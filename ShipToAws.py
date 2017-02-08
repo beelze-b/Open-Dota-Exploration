@@ -659,15 +659,15 @@ def GoThroughABlock(initialMatchID=2976775347, blockOfMatches=100):
                 mainDict[k].append(v)
             else: 
                 mainDict[k] = [v]
-        sleep(0.9)
+        sleep(1.2)
     return pd.DataFrame.from_dict(mainDict)
 
 
 # In[ ]:
 
-match_id = 2976775347
+match_id = 2976783327
 block = 100
-for _ in range(4000):
+for _ in range(3000):
     data = GoThroughABlock(match_id, block)
     data.to_csv("data/to_process/match{0}_block{1}.csv".format(match_id, block), index=False)
     match_id = match_id + block
