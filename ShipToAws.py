@@ -666,8 +666,8 @@ def GoThroughABlock(initialMatchID=2976775347, blockOfMatches=100):
 # In[ ]:
 
 match_id = 2976775347
-block = 10
-for _ in range(2000):
+block = 100
+for _ in range(4000):
     data = GoThroughABlock(match_id, block)
     data.to_csv("data/to_process/match{0}_block{1}.csv".format(match_id, block), index=False)
     match_id = match_id + block
