@@ -590,6 +590,7 @@ def extractDotaInformation(matchJSON):
             for pos in poss:
                 if player['hero_id'] == matchInfo[faction+pos]:
                     factionpos = faction+pos
+                    matchInfo[factionpos+'_hero_id'] = PlayerExtractKey(player, "hero_id")
                     matchInfo[factionpos+'_item0'] = PlayerExtractKey(player, 'item_0')
                     matchInfo[factionpos+'_item1'] = PlayerExtractKey(player, 'item_1')
                     matchInfo[factionpos+'_item2'] = PlayerExtractKey(player, 'item_2')
@@ -637,41 +638,37 @@ def GoThroughABlock(initialMatchID=2976775347, blockOfMatches=100):
     mainDict = {}
     
     for currentMatchID in range(initialMatchID, initialMatchID + blockOfMatches):
-        try:
-            sleep(0.5)
-            host = "https://api.opendota.com/api/matches/" + str(currentMatchID)
-            data = {'match_id': currentMatchID}
-            data = requests.get(host, data)
-
-            if data.status_code != 200:
-                continue
-
-            matchJSON = json.loads(data.content)
-
-            if 'lobby_type' not in matchJSON:
-                continue
-            lobby_type = matchJSON['lobby_type']
-            # 0 and 7 correspond to normal and ranked
-            if lobby_type != 0 and lobby_type != 7 and lobby_type != 1:
-                continue
-
-            matchPerformance = extractDotaInformation(matchJSON)       
-            for k, v in matchPerformance.items():
-                if k in mainDict:
-                    mainDict[k].append(v)
-                else: 
-                    mainDict[k] = [v]
-            sleep(0.7)
-        except Exception as e:
-            print currentMatchID
+        host = "https://api.opendota.com/api/matches/" + str(currentMatchID)
+        data = {'match_id': currentMatchID}
+        data = requests.get(host, data)
+        
+        if data.status_code != 200:
+            continue
+            
+        matchJSON = json.loads(data.content)
+        
+        if 'lobby_type' not in matchJSON:
+            continue
+        lobby_type = matchJSON['lobby_type']
+        # 0 and 7 correspond to normal and ranked
+        if lobby_type != 0 and lobby_type != 7 and lobby_type != 1:
+            continue
+            
+        matchPerformance = extractDotaInformation(matchJSON)       
+        for k, v in matchPerformance.items():
+            if k in mainDict:
+                mainDict[k].append(v)
+            else: 
+                mainDict[k] = [v]
+        sleep(0.9)
     return pd.DataFrame.from_dict(mainDict)
 
 
 # In[ ]:
 
-match_id = 2976789927
+match_id = 2976775347
 block = 100
-for _ in range(3000):
+for _ in range(10000):
     data = GoThroughABlock(match_id, block)
     data.to_csv("data/to_process/match{0}_block{1}.csv".format(match_id, block), index=False)
     match_id = match_id + block
