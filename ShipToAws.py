@@ -638,30 +638,33 @@ def GoThroughABlock(initialMatchID=2976775347, blockOfMatches=100):
     mainDict = {}
     
     for currentMatchID in range(initialMatchID, initialMatchID + blockOfMatches):
-        sleep(0.5)
-        host = "https://api.opendota.com/api/matches/" + str(currentMatchID)
-        data = {'match_id': currentMatchID}
-        data = requests.get(host, data)
-        
-        if data.status_code != 200:
-            continue
-            
-        matchJSON = json.loads(data.content)
-        
-        if 'lobby_type' not in matchJSON:
-            continue
-        lobby_type = matchJSON['lobby_type']
-        # 0 and 7 correspond to normal and ranked
-        if lobby_type != 0 and lobby_type != 7 and lobby_type != 1:
-            continue
-            
-        matchPerformance = extractDotaInformation(matchJSON)       
-        for k, v in matchPerformance.items():
-            if k in mainDict:
-                mainDict[k].append(v)
-            else: 
-                mainDict[k] = [v]
-        sleep(0.5)
+        try:
+            sleep(0.5)
+            host = "https://api.opendota.com/api/matches/" + str(currentMatchID)
+            data = {'match_id': currentMatchID}
+            data = requests.get(host, data)
+ 
+            if data.status_code != 200:
+                continue
+ 
+            matchJSON = json.loads(data.content)
+ 
+            if 'lobby_type' not in matchJSON:
+                continue
+            lobby_type = matchJSON['lobby_type']
+            # 0 and 7 correspond to normal and ranked
+            if lobby_type != 0 and lobby_type != 7 and lobby_type != 1:
+                continue
+ 
+            matchPerformance = extractDotaInformation(matchJSON)       
+            for k, v in matchPerformance.items():
+                if k in mainDict:
+                    mainDict[k].append(v)
+                else: 
+                    mainDict[k] = [v]
+            sleep(0.7)
+        except Exception as e:
+             print currentMatchID
     return pd.DataFrame.from_dict(mainDict)
 
 
