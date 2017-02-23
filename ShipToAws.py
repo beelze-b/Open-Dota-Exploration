@@ -638,6 +638,7 @@ def GoThroughABlock(initialMatchID=2976775347, blockOfMatches=100):
     mainDict = {}
     
     for currentMatchID in range(initialMatchID, initialMatchID + blockOfMatches):
+        sleep(0.5)
         host = "https://api.opendota.com/api/matches/" + str(currentMatchID)
         data = {'match_id': currentMatchID}
         data = requests.get(host, data)
@@ -660,7 +661,7 @@ def GoThroughABlock(initialMatchID=2976775347, blockOfMatches=100):
                 mainDict[k].append(v)
             else: 
                 mainDict[k] = [v]
-        sleep(0.9)
+        sleep(0.5)
     return pd.DataFrame.from_dict(mainDict)
 
 
