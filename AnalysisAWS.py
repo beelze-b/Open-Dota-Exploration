@@ -8,7 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.preprocessing import OneHotEncoder
-get_ipython().magic(u'matplotlib inline')
 import tensorflow as tf
 import glob
 import datetime
@@ -31,7 +30,7 @@ for f in os.listdir("data/anomaly_data"):
     if os.stat(filePath).st_size <= 3:
         continue
     validFilePaths.append(filePath)
-validFilePaths = np.random.choice(validFilePaths, 10, replace=False)
+validFilePaths = np.random.choice(validFilePaths, 100, replace=False)
 df_list = (pandas.read_csv(f) for f in validFilePaths)
 df = pandas.concat(df_list, ignore_index=True)
 df = df[df['radiant_win'].notnull()]
@@ -83,9 +82,7 @@ df_cat_num = enc.fit_transform(df_cat_num)
 # In[ ]:
 
 from scipy.sparse import coo_matrix, hstack
-print type(df_numerical)
-print type(df_cat_num)
-print type(df_cat)
+
 df_cat_num = coo_matrix(df_cat_num)
 df_cat = coo_matrix(df_cat)
 df = hstack([df_cat_num, df_numerical])
@@ -103,11 +100,6 @@ x = np.random.rand(df.shape[0])
 mask = np.where(x < 0.7)[0]
 mask1 = np.where(np.logical_and(x >= 0.7, x < 0.9))[0] 
 mask2 = np.where(x >= 0.9)[0]
-
-
-# In[ ]:
-
-print np.where(mask)[0]
 
 
 # In[ ]:
