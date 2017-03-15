@@ -171,5 +171,5 @@ with tf.Session() as sess:
 # In[ ]:
 
 print 'Done'
-print print datetime.datetime.now()
+print datetime.datetime.now()
 
