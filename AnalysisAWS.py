@@ -30,7 +30,7 @@ for f in os.listdir("data/anomaly_data"):
     if os.stat(filePath).st_size <= 3:
         continue
     validFilePaths.append(filePath)
-validFilePaths = np.random.choice(validFilePaths, 20, replace=False)
+validFilePaths = np.random.choice(validFilePaths, 5, replace=False)
 df_list = (pandas.read_csv(f) for f in validFilePaths)
 df = pandas.concat(df_list, ignore_index=True)
 df = df[df['radiant_win'].notnull()]
