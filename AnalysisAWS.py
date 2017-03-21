@@ -17,6 +17,7 @@ import datetime
 
 import os
 import os.path
+import gc
 
 
 # In[ ]:
@@ -151,10 +152,11 @@ with tf.Session() as sess:
     init, optimizer = construct(x)
     sess.run(init)
     numEpochs = 1000
-    numBatches = 1000
+    numBatches = 100
     batchSize = int(round(0.1 * df_train.shape[0]))
     flatten = lambda l: [item for sublist in l for item in sublist]
     for epochIter in xrange(numEpochs):
+        gc.collect()
         for batchItr in xrange(numBatches):
             indices = np.random.choice(range(df_train.shape[0]), batchSize, replace=False)
             batch = df_train[indices, :].tolil()
