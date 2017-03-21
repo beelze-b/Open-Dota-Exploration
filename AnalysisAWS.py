@@ -144,7 +144,7 @@ def construct(x, layer_size=[10, 10, NumFeatures], learning_rate=0.1):
     return init, optimizer     
 
 
-# In[16]:
+# In[19]:
 
 with tf.Session() as sess:
     x = tf.placeholder(tf.float32, [None, NumFeatures])
@@ -160,7 +160,7 @@ with tf.Session() as sess:
             batch = df_train[indices, :].tolil()
             ind = [[[i, batch.rows[i][j]] for j in range(len(batch.rows[i]))] for i in range(batch.shape[0])]
             ind = flatten(ind)
-            dat = flatten(batch.data)
+            dat = np.nan_to_num(flatten(batch.data))
             batch = tf.SparseTensor(ind, dat, [batch.shape[0], batch.shape[1]])
             sess.run(optimizer, feed_dict = {x : batch})
 
