@@ -114,7 +114,7 @@ df_test = df.tocsr()[mask2, :]
 NumFeatures = df.shape[1]
 
 
-# In[17]:
+# In[20]:
 
 def construct(x, layer_size=[10, 10, NumFeatures], learning_rate=0.1):
     y = x
@@ -130,7 +130,7 @@ def construct(x, layer_size=[10, 10, NumFeatures], learning_rate=0.1):
     weights_4 = tf.Variable(tf.random_normal([layer_size[2], NumFeatures]))
     bias_4 = tf.Variable(tf.random_normal([NumFeatures]))
     
-    layer1 = tf.nn.relu(tf.matmul(x, weights_1, a_is_sparse=True) + bias_1)
+    layer1 = tf.nn.relu(tf.sparse_tensor_dense_matmul(x, weights_1) + bias_1)
     layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
     layer3 = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
     output = tf.nn.relu(tf.matmul(layer3, weights_4, a_is_sparse=True, b_is_sparse=True) + bias_4)
@@ -162,10 +162,7 @@ with tf.Session() as sess:
             ind = flatten(ind)
             dat = np.nan_to_num(flatten(batch.data))
             batch = tf.SparseTensor(ind, dat, [batch.shape[0], batch.shape[1]])
-            try:
-                sess.run(optimizer, feed_dict = {x : batch})
-            except:
-                print dat
+            sess.run(optimizer, feed_dict = {x : batch})
 
 
 # In[ ]:
