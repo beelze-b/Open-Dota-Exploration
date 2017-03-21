@@ -162,7 +162,10 @@ with tf.Session() as sess:
             ind = flatten(ind)
             dat = np.nan_to_num(flatten(batch.data))
             batch = tf.SparseTensor(ind, dat, [batch.shape[0], batch.shape[1]])
-            sess.run(optimizer, feed_dict = {x : batch})
+            try:
+                sess.run(optimizer, feed_dict = {x : batch})
+            except:
+                print dat
 
 
 # In[ ]:
