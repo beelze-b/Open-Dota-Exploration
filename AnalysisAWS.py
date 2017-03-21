@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[ ]:
+# In[2]:
 
 import pandas
 import numpy as np
@@ -13,13 +13,13 @@ import glob
 import datetime
 
 
-# In[ ]:
+# In[3]:
 
 import os
 import os.path
 
 
-# In[ ]:
+# In[4]:
 
 print datetime.datetime.now()
 validFilePaths = []
@@ -36,14 +36,14 @@ df = pandas.concat(df_list, ignore_index=True)
 df = df[df['radiant_win'].notnull()]
 
 
-# In[ ]:
+# In[5]:
 
 print df.shape
 columns = df.columns
 df_catInteger_features_example = filter(lambda x: 'hero_id' in x, columns)
 
 
-# In[ ]:
+# In[6]:
 
 from itertools import chain
 # these will require string processing on the column names to work
@@ -63,7 +63,7 @@ categoricalIntegerFeatures = list(chain(*categoricalIntegerFeatures))
 catFull = list(chain(*catFull))
 
 
-# In[ ]:
+# In[7]:
 
 df_numerical = df[numFeatures]
 df_numerical.loc[:, 'radiant_win'] = df_numerical.loc[:, 'radiant_win'].apply(lambda x : int(x))
@@ -79,7 +79,7 @@ enc = OneHotEncoder(sparse = True)
 df_cat_num = enc.fit_transform(df_cat_num)
 
 
-# In[ ]:
+# In[8]:
 
 from scipy.sparse import coo_matrix, hstack
 
@@ -88,12 +88,12 @@ df_cat = coo_matrix(df_cat)
 df = hstack([df_cat_num, df_numerical])
 
 
-# In[ ]:
+# In[9]:
 
 # df = pandas.concat([df_numerical, df_cat, df_cat_num], ignore_index=True)
 
 
-# In[ ]:
+# In[10]:
 
 np.random.seed(1)
 x = np.random.rand(df.shape[0])
@@ -102,19 +102,19 @@ mask1 = np.where(np.logical_and(x >= 0.7, x < 0.9))[0]
 mask2 = np.where(x >= 0.9)[0]
 
 
-# In[ ]:
+# In[11]:
 
 df_train = df.tocsr()[mask, :]
 df_validation = df.tocsr()[mask1, :]
 df_test = df.tocsr()[mask2, :]
 
 
-# In[ ]:
+# In[12]:
 
 NumFeatures = df.shape[1]
 
 
-# In[ ]:
+# In[17]:
 
 def construct(x, layer_size=[10, 10, NumFeatures], learning_rate=0.1):
     y = x
@@ -130,10 +130,10 @@ def construct(x, layer_size=[10, 10, NumFeatures], learning_rate=0.1):
     weights_4 = tf.Variable(tf.random_normal([layer_size[2], NumFeatures]))
     bias_4 = tf.Variable(tf.random_normal([NumFeatures]))
     
-    layer1 = tf.nn.relu(tf.matmul(x, weights_1) + bias_1)
-    layer2 = tf.nn.relu(tf.matmul(layer1, weights_2) + bias_2)
-    layer3 = tf.nn.relu(tf.matmul(layer2, weights_3) + bias_3)
-    output = tf.nn.relu(tf.matmul(layer3, weights_4) + bias_4)
+    layer1 = tf.nn.relu(tf.matmul(x, weights_1, a_is_sparse=True) + bias_1)
+    layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
+    layer3 = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
+    output = tf.nn.relu(tf.matmul(layer3, weights_4, a_is_sparse=True, b_is_sparse=True) + bias_4)
     
     cost = tf.reduce_mean(tf.pow(y-output, 2))
     momentum = 0.5
@@ -144,7 +144,7 @@ def construct(x, layer_size=[10, 10, NumFeatures], learning_rate=0.1):
     return init, optimizer     
 
 
-# In[ ]:
+# In[16]:
 
 with tf.Session() as sess:
     x = tf.placeholder(tf.float32, [None, NumFeatures])
@@ -153,10 +153,15 @@ with tf.Session() as sess:
     numEpochs = 1000
     numBatches = 1000
     batchSize = int(round(0.1 * df_train.shape[0]))
+    flatten = lambda l: [item for sublist in l for item in sublist]
     for epochIter in xrange(numEpochs):
         for batchItr in xrange(numBatches):
             indices = np.random.choice(range(df_train.shape[0]), batchSize, replace=False)
-            batch = df_train[indices, :].toarray()
+            batch = df_train[indices, :].tolil()
+            ind = [[[i, batch.rows[i][j]] for j in range(len(batch.rows[i]))] for i in range(batch.shape[0])]
+            ind = flatten(ind)
+            dat = flatten(batch.data)
+            batch = tf.SparseTensor(ind, dat, [batch.shape[0], batch.shape[1]])
             sess.run(optimizer, feed_dict = {x : batch})
 
 
