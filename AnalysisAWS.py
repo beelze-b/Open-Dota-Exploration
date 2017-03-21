@@ -152,10 +152,11 @@ with tf.Session() as sess:
     init, optimizer = construct(x)
     sess.run(init)
     numEpochs = 1000
-    numBatches = 100
+    numBatches = 10
     batchSize = int(round(0.1 * df_train.shape[0]))
     flatten = lambda l: [item for sublist in l for item in sublist]
     for epochIter in xrange(numEpochs):
+        print 'Epoch: {0}'.format(epochIter)
         gc.collect()
         for batchItr in xrange(numBatches):
             indices = np.random.choice(range(df_train.shape[0]), batchSize, replace=False)
