@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[2]:
+# In[ ]:
 
 import pandas
 import numpy as np
@@ -13,13 +13,13 @@ import glob
 import datetime
 
 
-# In[3]:
+# In[ ]:
 
 import os
 import os.path
 
 
-# In[4]:
+# In[ ]:
 
 print datetime.datetime.now()
 validFilePaths = []
@@ -36,14 +36,14 @@ df = pandas.concat(df_list, ignore_index=True)
 df = df[df['radiant_win'].notnull()]
 
 
-# In[5]:
+# In[ ]:
 
 print df.shape
 columns = df.columns
 df_catInteger_features_example = filter(lambda x: 'hero_id' in x, columns)
 
 
-# In[6]:
+# In[ ]:
 
 from itertools import chain
 # these will require string processing on the column names to work
@@ -63,7 +63,7 @@ categoricalIntegerFeatures = list(chain(*categoricalIntegerFeatures))
 catFull = list(chain(*catFull))
 
 
-# In[7]:
+# In[ ]:
 
 df_numerical = df[numFeatures]
 df_numerical.loc[:, 'radiant_win'] = df_numerical.loc[:, 'radiant_win'].apply(lambda x : int(x))
@@ -79,7 +79,7 @@ enc = OneHotEncoder(sparse = True)
 df_cat_num = enc.fit_transform(df_cat_num)
 
 
-# In[8]:
+# In[ ]:
 
 from scipy.sparse import coo_matrix, hstack
 
@@ -88,12 +88,12 @@ df_cat = coo_matrix(df_cat)
 df = hstack([df_cat_num, df_numerical])
 
 
-# In[9]:
+# In[ ]:
 
 # df = pandas.concat([df_numerical, df_cat, df_cat_num], ignore_index=True)
 
 
-# In[10]:
+# In[ ]:
 
 np.random.seed(1)
 x = np.random.rand(df.shape[0])
@@ -102,21 +102,24 @@ mask1 = np.where(np.logical_and(x >= 0.7, x < 0.9))[0]
 mask2 = np.where(x >= 0.9)[0]
 
 
-# In[11]:
+# In[ ]:
 
 df_train = df.tocsr()[mask, :]
 df_validation = df.tocsr()[mask1, :]
 df_test = df.tocsr()[mask2, :]
 
 
-# In[12]:
+# In[ ]:
 
 NumFeatures = df.shape[1]
 
 
-# In[20]:
+# In[ ]:
 
 def construct(x, layer_size=[10, 10, NumFeatures], learning_rate=0.1):
+    print 'hello'
+    print x
+    # y = tf.sparse_tensor_to_dense(x)
     y = x
     #encoders
     weights_1 = tf.Variable(tf.random_normal([NumFeatures, layer_size[0]]))
@@ -130,7 +133,7 @@ def construct(x, layer_size=[10, 10, NumFeatures], learning_rate=0.1):
     weights_4 = tf.Variable(tf.random_normal([layer_size[2], NumFeatures]))
     bias_4 = tf.Variable(tf.random_normal([NumFeatures]))
     
-    layer1 = tf.nn.relu(tf.sparse_tensor_dense_matmul(x, weights_1) + bias_1)
+    layer1 = tf.nn.relu(tf.matmul(x, weights_1, a_is_sparse=True) + bias_1)
     layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
     layer3 = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
     output = tf.nn.relu(tf.matmul(layer3, weights_4, a_is_sparse=True, b_is_sparse=True) + bias_4)
@@ -144,7 +147,7 @@ def construct(x, layer_size=[10, 10, NumFeatures], learning_rate=0.1):
     return init, optimizer     
 
 
-# In[19]:
+# In[ ]:
 
 with tf.Session() as sess:
     x = tf.placeholder(tf.float32, [None, NumFeatures])
@@ -161,7 +164,8 @@ with tf.Session() as sess:
             ind = [[[i, batch.rows[i][j]] for j in range(len(batch.rows[i]))] for i in range(batch.shape[0])]
             ind = flatten(ind)
             dat = np.nan_to_num(flatten(batch.data))
-            batch = tf.SparseTensor(ind, dat, [batch.shape[0], batch.shape[1]])
+            batch = tf.sparse_to_dense(ind, [batch.shape[0], batch.shape[1]], dat)
+            batch = batch.eval()
             sess.run(optimizer, feed_dict = {x : batch})
 
 
