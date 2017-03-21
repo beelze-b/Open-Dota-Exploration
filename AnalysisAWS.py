@@ -117,9 +117,6 @@ NumFeatures = df.shape[1]
 # In[ ]:
 
 def construct(x, layer_size=[10, 10, NumFeatures], learning_rate=0.1):
-    print 'hello'
-    print x
-    # y = tf.sparse_tensor_to_dense(x)
     y = x
     #encoders
     weights_1 = tf.Variable(tf.random_normal([NumFeatures, layer_size[0]]))
