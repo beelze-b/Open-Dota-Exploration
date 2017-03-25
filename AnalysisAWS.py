@@ -117,43 +117,38 @@ NumFeatures = df.shape[1]
 
 # In[ ]:
 
-def construct(x, layer_size=[10, 10, NumFeatures], learning_rate=0.1):
-    y = x
-    #encoders
-    weights_1 = tf.Variable(tf.random_normal([NumFeatures, layer_size[0]]))
-    bias_1 = tf.Variable(tf.random_normal([layer_size[0]]))
-    weights_2 = tf.Variable(tf.random_normal([layer_size[0], layer_size[1]]))
-    bias_2 = tf.Variable(tf.random_normal([layer_size[1]]))
+x = tf.placeholder(tf.float32, [None, NumFeatures])
+y = x
+#encoders
+weights_1 = tf.Variable(tf.random_normal([NumFeatures, layer_size[0]]), name='weights_1')
+bias_1 = tf.Variable(tf.random_normal([layer_size[0]]), name='bias_1')
+weights_2 = tf.Variable(tf.random_normal([layer_size[0], layer_size[1]]), name='weights_2')
+bias_2 = tf.Variable(tf.random_normal([layer_size[1]]), name='bias_2')
     
-    #decoders
-    weights_3 = tf.Variable(tf.random_normal([layer_size[1], layer_size[2]]))
-    bias_3 = tf.Variable(tf.random_normal([layer_size[2]]))
-    weights_4 = tf.Variable(tf.random_normal([layer_size[2], NumFeatures]))
-    bias_4 = tf.Variable(tf.random_normal([NumFeatures]))
+#decoders
+weights_3 = tf.Variable(tf.random_normal([layer_size[1], layer_size[2]]), name='weights_3')
+bias_3 = tf.Variable(tf.random_normal([layer_size[2]]), name='bias_3')
+weights_4 = tf.Variable(tf.random_normal([layer_size[2], NumFeatures]), name='weights_4')
+bias_4 = tf.Variable(tf.random_normal([NumFeatures]), name='bias_4')
     
-    layer1 = tf.nn.relu(tf.matmul(x, weights_1, a_is_sparse=True) + bias_1)
-    layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
-    layer3 = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
-    output = tf.nn.relu(tf.matmul(layer3, weights_4, a_is_sparse=True, b_is_sparse=True) + bias_4)
+layer1 = tf.nn.relu(tf.matmul(x, weights_1, a_is_sparse=True) + bias_1)
+layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
+layer3 = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
+output = tf.nn.relu(tf.matmul(layer3, weights_4, a_is_sparse=True, b_is_sparse=True) + bias_4)
     
-    cost = tf.reduce_mean(tf.pow(y-output, 2))
-    momentum = 0.5
-    optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(cost)
+cost = tf.reduce_mean(tf.pow(y-output, 2))
+momentum = 0.5
+optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(cost)
     
-    variable_dict = {'weights_1': weights_1, 'weights_2': weights_2, 'weights_3': weights_3, 'weights_4': weights_4,
+variable_dict = {'weights_1': weights_1, 'weights_2': weights_2, 'weights_3': weights_3, 'weights_4': weights_4,
                      'bias_1': bias_1, 'bias_2': bias_2, 'bias_3': bias_3, 'bias_4': bias_4}
-    saver = tf.train.Saver(variable_dict)
-    init = tf.global_variables_initializer()
-    
-    return init, optimizer, saver     
+saver = tf.train.Saver(variable_dict)
+init = tf.global_variables_initializer()
 
 
 # In[ ]:
 
-with tf.Session() as sess:
-    x = tf.placeholder(tf.float32, [None, NumFeatures])
-    init, optimizer, saver = construct(x)
-    sess.run(init)
+def train():
     numEpochs = 1000
     numBatches = 10
     batchSize = int(round(0.1 * df_train.shape[0]))
@@ -172,6 +167,14 @@ with tf.Session() as sess:
             batch = tf.sparse_to_dense(ind, [batch.shape[0], batch.shape[1]], dat)
             batch = batch.eval()
             sess.run(optimizer, feed_dict = {x : batch})
+
+if (trainFlag):
+    with tf.Session() as sess:
+        sess.run(init)
+        train()
+    else:
+        saver.restore(sess, 'model-backups/auto_encoder-model')
+    
 
 
 # In[ ]:
