@@ -140,16 +140,19 @@ def construct(x, layer_size=[10, 10, NumFeatures], learning_rate=0.1):
     momentum = 0.5
     optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(cost)
     
+    variable_dict = {'weights_1': weights_1, 'weights_2': weights_2, 'weights_3': weights_3, 'weights_4': weights_4,
+                     'bias_1': bias_1, 'bias_2': bias_2, 'bias_3': bias_3, 'bias_4': bias_4}
+    saver = tf.train.Saver(variable_dict)
     init = tf.global_variables_initializer()
     
-    return init, optimizer     
+    return init, optimizer, saver     
 
 
 # In[ ]:
 
 with tf.Session() as sess:
     x = tf.placeholder(tf.float32, [None, NumFeatures])
-    init, optimizer = construct(x)
+    init, optimizer, saver = construct(x)
     sess.run(init)
     numEpochs = 1000
     numBatches = 10
@@ -158,6 +161,8 @@ with tf.Session() as sess:
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
+        if epochIter % 100 == 0:
+            saver.save(sess, 'model-backups/auto_encoder-model', global_step = epochIter)
         for batchItr in xrange(numBatches):
             indices = np.random.choice(range(df_train.shape[0]), batchSize, replace=False)
             batch = df_train[indices, :].tolil()
