@@ -22,6 +22,25 @@ import gc
 
 # In[ ]:
 
+import argparse
+parser = argparse.ArgumentParser(description = "Please insert the train flag")
+
+
+# In[ ]:
+
+parser.add_argument('-t', '--train', action = "store",
+                    help='If true, we train and save. Else, otherwise.', required = True)
+
+
+# In[ ]:
+
+my_args = vars(parser.parse_args())
+trainFlag = my_args['train']
+trainFlag = trainFlag.lower() in ("True", "t", "true", "1", 1)
+
+
+# In[ ]:
+
 print datetime.datetime.now()
 validFilePaths = []
 for f in os.listdir("data/anomaly_data"):
@@ -145,6 +164,8 @@ variable_dict = {'weights_1': weights_1, 'weights_2': weights_2, 'weights_3': we
 saver = tf.train.Saver(variable_dict)
 init = tf.global_variables_initializer()
 
+ckpoint_dir = os.path.join(os.getcwd(), 'model-backups/model.ckpt')
+
 
 # In[ ]:
 
@@ -157,7 +178,7 @@ def train():
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
         if epochIter % 100 == 0:
-            saver.save(sess, 'model-backups/auto_encoder-model', global_step = epochIter)
+            saver.save(sess, ckpoint_dir)
         for batchItr in xrange(numBatches):
             indices = np.random.choice(range(df_train.shape[0]), batchSize, replace=False)
             batch = df_train[indices, :].tolil()
@@ -168,12 +189,12 @@ def train():
             batch = batch.eval()
             sess.run(optimizer, feed_dict = {x : batch})
 
-if (trainFlag):
-    with tf.Session() as sess:
+with tf.Session() as sess:
+    if (trainFlag):
         sess.run(init)
         train()
     else:
-        saver.restore(sess, 'model-backups/auto_encoder-model')
+        saver.restore(sess, ckpoint_dir)
     
 
 
