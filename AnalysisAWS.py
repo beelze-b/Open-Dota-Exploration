@@ -132,6 +132,7 @@ df_test = df.tocsr()[mask2, :]
 # In[ ]:
 
 NumFeatures = df.shape[1]
+layer_size = [10, 10, NumFeatures]
 
 
 # In[ ]:
