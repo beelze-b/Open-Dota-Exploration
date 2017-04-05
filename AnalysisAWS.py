@@ -50,7 +50,10 @@ for f in os.listdir("data/anomaly_data"):
     if os.stat(filePath).st_size <= 3:
         continue
     validFilePaths.append(filePath)
-validFilePaths = np.random.choice(validFilePaths, 5, replace=False)
+    
+numF = int(0.8 * len(validFilePaths))
+print 'Using this many files {0}'.format(numF)
+validFilePaths = np.random.choice(validFilePaths, numF, replace=False)
 df_list = (pandas.read_csv(f) for f in validFilePaths)
 df = pandas.concat(df_list, ignore_index=True)
 df = df[df['radiant_win'].notnull()]
@@ -173,13 +176,13 @@ ckpoint_dir = os.path.join(os.getcwd(), 'model-backups/model.ckpt')
 
 def train():
     numEpochs = 1000
-    numBatches = 10
+    numBatches = 100
     batchSize = int(round(0.1 * df_train.shape[0]))
     flatten = lambda l: [item for sublist in l for item in sublist]
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
-        if epochIter % 2 == 0:
+        if epochIter % 100 == 0:
             saver.save(sess, ckpoint_dir)
         for batchItr in xrange(numBatches):
             indices = np.random.choice(range(df_train.shape[0]), batchSize, replace=False)
@@ -197,7 +200,6 @@ with tf.Session() as sess:
         train()
     else:
         saver.restore(sess, ckpoint_dir)
-    
 
 
 # In[ ]:
