@@ -51,7 +51,7 @@ for f in os.listdir("data/anomaly_data"):
         continue
     validFilePaths.append(filePath)
     
-numF = int(0.8 * len(validFilePaths))
+numF = int(0.5 * len(validFilePaths))
 print 'Using this many files {0}'.format(numF)
 validFilePaths = np.random.choice(validFilePaths, numF, replace=False)
 df_list = (pandas.read_csv(f) for f in validFilePaths)
@@ -75,8 +75,8 @@ numericalFeatures = ['match_id', 'positive_votes', 'negative_votes', 'first_bloo
                     'gpm', 'hero_heal', 'xpm', 'totalgold', 'totalxp', 'lasthits', 'denies',
                     'tower_kills', 'courier_kills', 'gold_spent', 'observer_uses', 'sentry_uses',
                     'ancient_kills', 'neutral_kills', 'camps_stacked', 'pings', 'rune_pickups']
-categoricalIntegerFeatures = ['barracks_status', 'tower_status', 'hero_id', 
-                              'item0', 'item1', 'item2', 'item3', 'item4', 'item5']
+categoricalIntegerFeatures = ['barracks_status', 'tower_status', 'hero_id'] 
+                              #'item0', 'item1', 'item2', 'item3', 'item4', 'item5']
 categoricalFullFeatures = ['patch']
 numFeatures = [filter(lambda x: z in x, columns) for z in numericalFeatures]
 categoricalIntegerFeatures  = [filter(lambda x: z in x, columns) for z in categoricalIntegerFeatures]
@@ -177,7 +177,7 @@ ckpoint_dir = os.path.join(os.getcwd(), 'model-backups/model.ckpt')
 def train():
     numEpochs = 1000
     numBatches = 100
-    batchSize = int(round(0.1 * df_train.shape[0]))
+    batchSize = int(round(0.05 * df_train.shape[0]))
     flatten = lambda l: [item for sublist in l for item in sublist]
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
