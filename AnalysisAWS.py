@@ -160,7 +160,7 @@ layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=T
 layer3 = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
 output = tf.nn.relu(tf.matmul(layer3, weights_4, a_is_sparse=True, b_is_sparse=True) + bias_4)
     
-cost = tf.reduce_mean(tf.pow(y-output, 2))
+cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y-output, 2), 1))
 momentum = 0.5
 optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(cost)
     
