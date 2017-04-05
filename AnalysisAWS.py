@@ -177,7 +177,7 @@ ckpoint_dir = os.path.join(os.getcwd(), 'model-backups/model.ckpt')
 def train():
     numEpochs = 1000
     numBatches = 100
-    batchSize = int(round(0.05 * df_train.shape[0]))
+    batchSize = int(round(0.001 * df_train.shape[0]))
     flatten = lambda l: [item for sublist in l for item in sublist]
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
