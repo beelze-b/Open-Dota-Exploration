@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[31]:
+# In[ ]:
 
 import pandas
 import numpy as np
@@ -14,33 +14,33 @@ import datetime
 import itertools
 
 
-# In[10]:
+# In[ ]:
 
 import os
 import os.path
 import gc
 
 
-# In[3]:
+# In[ ]:
 
 import argparse
 parser = argparse.ArgumentParser(description = "Please insert the train flag")
 
 
-# In[4]:
+# In[ ]:
 
 parser.add_argument('-t', '--train', action = "store",
                     help='If true, we train and save. Else, otherwise.', required = True)
 
 
-# In[5]:
+# In[ ]:
 
 my_args = vars(parser.parse_args())
 trainFlag = my_args['train']
 trainFlag = trainFlag.lower() in ("True", "t", "true", "1", 1)
 
 
-# In[11]:
+# In[ ]:
 
 print datetime.datetime.now()
 validFilePaths = []
@@ -60,14 +60,14 @@ df = pandas.concat(df_list, ignore_index=True)
 df = df[df['radiant_win'].notnull()]
 
 
-# In[12]:
+# In[ ]:
 
 print df.shape
 columns = df.columns
 df_catInteger_features_example = filter(lambda x: 'hero_id' in x, columns)
 
 
-# In[34]:
+# In[ ]:
 
 from itertools import chain
 # these will require string processing on the column names to work
@@ -87,7 +87,7 @@ categoricalIntegerFeatures = list(chain(*categoricalIntegerFeatures))
 catFull = list(chain(*catFull))
 
 
-# In[58]:
+# In[ ]:
 
 df_numerical = df[numFeatures]
 df_numerical.loc[:, 'radiant_win'] = df_numerical.loc[:, 'radiant_win'].apply(lambda x : int(x))
