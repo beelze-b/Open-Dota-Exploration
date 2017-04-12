@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[ ]:
+# In[31]:
 
 import pandas
 import numpy as np
@@ -11,35 +11,36 @@ from sklearn.preprocessing import OneHotEncoder
 import tensorflow as tf
 import glob
 import datetime
+import itertools
 
 
-# In[ ]:
+# In[10]:
 
 import os
 import os.path
 import gc
 
 
-# In[ ]:
+# In[3]:
 
 import argparse
 parser = argparse.ArgumentParser(description = "Please insert the train flag")
 
 
-# In[ ]:
+# In[4]:
 
 parser.add_argument('-t', '--train', action = "store",
                     help='If true, we train and save. Else, otherwise.', required = True)
 
 
-# In[ ]:
+# In[5]:
 
 my_args = vars(parser.parse_args())
 trainFlag = my_args['train']
 trainFlag = trainFlag.lower() in ("True", "t", "true", "1", 1)
 
 
-# In[ ]:
+# In[11]:
 
 print datetime.datetime.now()
 validFilePaths = []
@@ -51,7 +52,7 @@ for f in os.listdir("data/anomaly_data"):
         continue
     validFilePaths.append(filePath)
     
-numF = int(0.5 * len(validFilePaths))
+numF = int(0.1 * len(validFilePaths))
 print 'Using this many files {0}'.format(numF)
 validFilePaths = np.random.choice(validFilePaths, numF, replace=False)
 df_list = (pandas.read_csv(f) for f in validFilePaths)
@@ -59,14 +60,14 @@ df = pandas.concat(df_list, ignore_index=True)
 df = df[df['radiant_win'].notnull()]
 
 
-# In[ ]:
+# In[12]:
 
 print df.shape
 columns = df.columns
 df_catInteger_features_example = filter(lambda x: 'hero_id' in x, columns)
 
 
-# In[ ]:
+# In[34]:
 
 from itertools import chain
 # these will require string processing on the column names to work
@@ -86,7 +87,7 @@ categoricalIntegerFeatures = list(chain(*categoricalIntegerFeatures))
 catFull = list(chain(*catFull))
 
 
-# In[ ]:
+# In[58]:
 
 df_numerical = df[numFeatures]
 df_numerical.loc[:, 'radiant_win'] = df_numerical.loc[:, 'radiant_win'].apply(lambda x : int(x))
@@ -98,8 +99,26 @@ vectorizer = DictVectorizer(sparse = True)
 df_cat = vectorizer.fit_transform(df_cat.fillna('NA').to_dict(orient="records"))
 
 #scipy sparse
+# need to make sure that the categorical columns see all fields during training
 enc = OneHotEncoder(sparse = True)
-df_cat_num = enc.fit_transform(df_cat_num)
+fitMatrix = dict.fromkeys(categoricalIntegerFeatures)
+heroColumns = [filter(lambda x: z in x, columns) for z in categoricalIntegerFeatures]
+barrackColumns = [filter(lambda x: z in x, columns) for z in categoricalIntegerFeatures]
+towerColumns = [filter(lambda x: z in x, columns) for z in categoricalIntegerFeatures]
+heroesAllCategories = list(set(range(1, 115) + [i[0] for i in                             reduce(lambda x, y: x+y, [df_cat_num[i].values for i in heroColumns])]))
+barrackAllCategories = list(set([i[0] for i in reduce(lambda x, y: x+y, [df_cat_num[i].values for i in barrackColumns])]))
+towerAllCategories = list(set([i[0] for i in reduce(lambda x, y: x+y, [df_cat_num[i].values for i in towerColumns])]))
+towerAllCategories =list(itertools.chain.from_iterable(itertools.repeat(towerAllCategories,                             1+len(heroesAllCategories)/len(towerAllCategories))))[:len(heroesAllCategories)]
+barrackAllCategories=list(itertools.chain.from_iterable(itertools.repeat(barrackAllCategories,                             1+len(heroesAllCategories)/len(barrackAllCategories))))[:len(heroesAllCategories)]
+
+for column in heroColumns:
+    fitMatrix[column[0]] = heroesAllCategories
+for column in towerColumns:
+    fitMatrix[column[0]] = towerAllCategories
+for column in barrackColumns:
+    fitMatrix[column[0]] = barrackAllCategories
+enc.fit(pandas.DataFrame.from_dict(fitMatrix))
+df_cat_num = enc.transform(df_cat_num)
 
 
 # In[ ]:
@@ -170,6 +189,21 @@ saver = tf.train.Saver(variable_dict)
 init = tf.global_variables_initializer()
 
 ckpoint_dir = os.path.join(os.getcwd(), 'model-backups/model.ckpt')
+
+
+# In[ ]:
+
+def test(test_data):
+    batch = test_data[indices, :].tolil()
+    ind = [[[i, batch.rows[i][j]] for j in range(len(batch.rows[i]))] for i in range(batch.shape[0])]
+    ind = flatten(ind)
+    dat = np.nan_to_num(flatten(batch.data))
+    batch = tf.sparse_to_dense(ind, [batch.shape[0], batch.shape[1]], dat)
+    data = batch.eval()
+    layer1 = tf.nn.relu(tf.matmul(data, weights_1, a_is_sparse=True) + bias_1)
+    layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
+    layer3 = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
+    output = tf.nn.relu(tf.matmul(layer3, weights_4, a_is_sparse=True, b_is_sparse=True) + bias_4)
 
 
 # In[ ]:
