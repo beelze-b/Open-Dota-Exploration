@@ -1,0 +1,47 @@
+Pure Cat
+patch
+
+Num Cat
+barracks_status
+tower_status
+hero_id
+item[0-5]
+
+
+
+
+Num
+
+match_id
+positive_votes
+negative_votes
+first_blood_time
+radiant_win - really cat but already in good form so leave it untouched
+duration
+kills
+deaths
+assists
+apm
+kpm
+kda
+hero_dmg
+gpm
+hero_heal
+xpm
+totalgold
+totalxp
+lasthits
+denies
+tower_kills
+courier_kills
+gold_spent
+observer_uses
+sentry_uses
+ancient_kills
+neutral_kills
+camps_stacked
+pings
+rune_pickups
+
+
+Finally Got OneHotEncoding fixed. Still need to work on test function
