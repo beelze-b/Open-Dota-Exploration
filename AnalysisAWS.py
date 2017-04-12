@@ -101,23 +101,34 @@ df_cat = vectorizer.fit_transform(df_cat.fillna('NA').to_dict(orient="records"))
 #scipy sparse
 # need to make sure that the categorical columns see all fields during training
 enc = OneHotEncoder(sparse = True)
-fitMatrix = dict.fromkeys(categoricalIntegerFeatures)
-heroColumns = [filter(lambda x: z in x, columns) for z in categoricalIntegerFeatures]
-barrackColumns = [filter(lambda x: z in x, columns) for z in categoricalIntegerFeatures]
-towerColumns = [filter(lambda x: z in x, columns) for z in categoricalIntegerFeatures]
-heroesAllCategories = list(set(range(1, 115) + [i[0] for i in                             reduce(lambda x, y: x+y, [df_cat_num[i].values for i in heroColumns])]))
-barrackAllCategories = list(set([i[0] for i in reduce(lambda x, y: x+y, [df_cat_num[i].values for i in barrackColumns])]))
-towerAllCategories = list(set([i[0] for i in reduce(lambda x, y: x+y, [df_cat_num[i].values for i in towerColumns])]))
-towerAllCategories =list(itertools.chain.from_iterable(itertools.repeat(towerAllCategories,                             1+len(heroesAllCategories)/len(towerAllCategories))))[:len(heroesAllCategories)]
-barrackAllCategories=list(itertools.chain.from_iterable(itertools.repeat(barrackAllCategories,                             1+len(heroesAllCategories)/len(barrackAllCategories))))[:len(heroesAllCategories)]
+fitMatrix = dict.fromkeys(map(lambda x: unicode(x), categoricalIntegerFeatures))
 
-for column in heroColumns:
-    fitMatrix[column[0]] = heroesAllCategories
-for column in towerColumns:
-    fitMatrix[column[0]] = towerAllCategories
-for column in barrackColumns:
-    fitMatrix[column[0]] = barrackAllCategories
-enc.fit(pandas.DataFrame.from_dict(fitMatrix))
+towerColumns = [filter(lambda x: z in x, columns) for z in ['tower_status']]
+towerAllCategories = list(set(reduce(lambda x, y: x+y, [df_cat_num[i].values.tolist() for i in towerColumns[0]])))
+
+
+heroColumns = [filter(lambda x: z in x, columns) for z in ['hero_id']]
+heroesAllCategories = list(set(range(1, 115)                         + reduce(lambda x, y: x+y, [df_cat_num[i].values.tolist() for i in heroColumns[0]])))
+heroesAllCategories = list(itertools.chain.from_iterable(itertools.repeat(heroesAllCategories,                             1+len(towerAllCategories)/len(heroesAllCategories))))[:len(towerAllCategories)]
+
+barrackColumns = [filter(lambda x: z in x, columns) for z in ['barracks_status']]
+barrackAllCategories = list(set(reduce(lambda x, y: x+y, [df_cat_num[i].values.tolist() for i in barrackColumns[0]])))
+barrackAllCategories = list(itertools.chain.from_iterable(itertools.repeat(barrackAllCategories,                             1+len(towerAllCategories)/len(barrackAllCategories))))[:len(towerAllCategories)]
+
+
+
+
+for column in heroColumns[0]:
+    fitMatrix[column] = heroesAllCategories
+for column in towerColumns[0]:
+    fitMatrix[column] = towerAllCategories
+for column in barrackColumns[0]:
+    fitMatrix[column] = barrackAllCategories
+
+fitMatrix = pandas.DataFrame.from_dict(fitMatrix)
+# order of columns matters
+fitMatrix = fitMatrix[df_cat_num.columns.values.tolist()]
+enc.fit(fitMatrix)
 df_cat_num = enc.transform(df_cat_num)
 
 
@@ -156,6 +167,16 @@ df_test = df.tocsr()[mask2, :]
 NumFeatures = df.shape[1]
 layer_size = [10, 10, NumFeatures]
 learning_rate = 0.1
+
+
+# In[ ]:
+
+print NumFeatures
+
+
+# In[ ]:
+
+print df_train.shape
 
 
 # In[ ]:
