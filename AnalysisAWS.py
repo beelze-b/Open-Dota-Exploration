@@ -226,6 +226,7 @@ def test(test_data):
     dat = np.nan_to_num(flatten(batch.data))
     batch = tf.sparse_to_dense(ind, [batch.shape[0], batch.shape[1]], dat)
     data = batch.eval()
+    data = data.astype(np.float32)
     layer1 = tf.nn.relu(tf.matmul(data, weights_1, a_is_sparse=True) + bias_1)
     layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
     output = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
