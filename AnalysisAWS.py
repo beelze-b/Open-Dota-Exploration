@@ -196,13 +196,10 @@ bias_2 = tf.Variable(tf.random_normal([layer_size[1]]), name='bias_2')
 #decoders
 weights_3 = tf.Variable(tf.random_normal([layer_size[1], layer_size[2]]), name='weights_3')
 bias_3 = tf.Variable(tf.random_normal([layer_size[2]]), name='bias_3')
-weights_4 = tf.Variable(tf.random_normal([layer_size[2], NumFeatures]), name='weights_4')
-bias_4 = tf.Variable(tf.random_normal([NumFeatures]), name='bias_4')
-    
+  
 layer1 = tf.nn.relu(tf.matmul(x, weights_1, a_is_sparse=True) + bias_1)
 layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
-layer3 = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
-output = tf.nn.relu(tf.matmul(layer3, weights_4, a_is_sparse=True, b_is_sparse=True) + bias_4)
+output = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
     
 cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y-output, 2), 1))
 rank = tf.rank(cost)
@@ -231,8 +228,7 @@ def test(test_data):
     data = batch.eval()
     layer1 = tf.nn.relu(tf.matmul(data, weights_1, a_is_sparse=True) + bias_1)
     layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
-    layer3 = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
-    output = tf.nn.relu(tf.matmul(layer3, weights_4, a_is_sparse=True, b_is_sparse=True) + bias_4)
+    output = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
     residuals = tf.reduce_sum(tf.abs(output - batch), axis = 1)
     residuals = residuals.eval()
     indices = np.argsort(residuals)[::-1]
