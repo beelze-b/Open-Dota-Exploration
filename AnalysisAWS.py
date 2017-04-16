@@ -266,7 +266,7 @@ with tf.Session() as sess:
         train()
     else:
         print 'Doing test'
-        print weighs_1[0, :].eval()
+        print weights_1[0, :].eval()
         print bias_1.eval()
         print weights_2[0,:].eval()
         print bias_2.eval()
