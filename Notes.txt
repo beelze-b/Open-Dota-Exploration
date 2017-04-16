@@ -45,3 +45,4 @@ rune_pickups
 
 
 Finally Got OneHotEncoding fixed. Still need to work on test function
+Had to fix number of layers. Retraining
