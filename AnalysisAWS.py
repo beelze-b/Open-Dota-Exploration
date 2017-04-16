@@ -266,11 +266,11 @@ with tf.Session() as sess:
         train()
     else:
         print 'Doing test'
+        saver.restore(sess, ckpoint_dir)
         print weights_1[0, :].eval()
         print bias_1.eval()
         print weights_2[0,:].eval()
         print bias_2.eval()
-        saver.restore(sess, ckpoint_dir)
         anomalies, output, indices_highest_anomaly = test(df_test)
         np.savetxt("data/anomalies.csv", anomalies, delimiter=",")
         np.savetxt("data/output.csv", output, delimiter=",")
