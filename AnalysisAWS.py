@@ -219,7 +219,7 @@ ckpoint_dir = os.path.join(os.getcwd(), 'model-backups/model.ckpt')
 
 flatten = lambda l: [item for sublist in l for item in sublist]
 
-def test(test_data):
+def test(sess, test_data):
     batch = test_data.tolil()
     ind = [[[i, batch.rows[i][j]] for j in range(len(batch.rows[i]))] for i in range(batch.shape[0])]
     ind = flatten(ind)
@@ -231,9 +231,9 @@ def test(test_data):
     layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
     output = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
     residuals = tf.reduce_sum(tf.abs(output - tf.cast(batch, tf.float32)), axis = 1)
-    residuals = residuals.eval()
+    residuals = sess.run(residuals)
     indices = np.argsort(residuals)[::-1]
-    return data[indices[0:10], :], output.eval()[indices[0:10], :], indices
+    return data, output, indices
 
 
 # In[ ]:
@@ -271,7 +271,11 @@ with tf.Session() as sess:
         print bias_1.eval()
         print weights_2[0,:].eval()
         print bias_2.eval()
-        anomalies, output, indices_highest_anomaly = test(df_test)
+        anomalies, output, indices_test = test(sess, df_test)
+        anomalies = anomalies.eval()
+        output = output.eval()
+        anomalies = anomalies[indices_test[0:10], :]
+        output = output[indices_test[0:10], :]
         np.savetxt("data/anomalies.csv", anomalies, delimiter=",")
         np.savetxt("data/output.csv", output, delimiter=",")
         np.savetxt('data/indices.csv', indices_highest_anomaly, delimiter = ',')
