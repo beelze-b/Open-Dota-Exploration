@@ -280,7 +280,7 @@ with tf.Session() as sess:
         print output[0, 0:10]
         np.savetxt("data/anomalies.csv", anomalies, delimiter=",")
         np.savetxt("data/output.csv", output, delimiter=",")
-        np.savetxt('data/indices.csv', indices_highest_anomaly, delimiter = ',')
+        np.savetxt('data/indices.csv', indices_test, delimiter = ',')
 
 
 # In[ ]:
