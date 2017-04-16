@@ -242,10 +242,6 @@ def train():
     numEpochs = 1000
     numBatches = 100
     batchSize = int(round(0.001 * df_train.shape[0]))
-    print weighs_1[0, :].eval()
-    print bias_1.eval()
-    print weights_2[0,:].eval()
-    print bias_2.eval()
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
@@ -261,6 +257,7 @@ def train():
             batch = batch.eval()
             sess.run(optimizer, feed_dict = {x : batch})
 
+
 with tf.Session() as sess:
     if sess.run(rank) != 0:
         raise Exception("Wrong dimenions of cost")
@@ -269,6 +266,10 @@ with tf.Session() as sess:
         train()
     else:
         print 'Doing test'
+        print weighs_1[0, :].eval()
+        print bias_1.eval()
+        print weights_2[0,:].eval()
+        print bias_2.eval()
         saver.restore(sess, ckpoint_dir)
         anomalies, output, indices_highest_anomaly = test(df_test)
         np.savetxt("data/anomalies.csv", anomalies, delimiter=",")
