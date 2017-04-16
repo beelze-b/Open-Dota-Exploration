@@ -143,7 +143,7 @@ from scipy.sparse import coo_matrix, hstack
 
 df_cat_num = coo_matrix(df_cat_num)
 df_cat = coo_matrix(df_cat)
-df = hstack([df_cat_num, df_numerical])
+df = hstack([df_numerical, df_cat_num])
 
 
 # In[ ]:
