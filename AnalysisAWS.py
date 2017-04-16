@@ -226,13 +226,11 @@ def test(test_data):
     dat = np.nan_to_num(flatten(batch.data))
     batch = tf.sparse_to_dense(ind, [batch.shape[0], batch.shape[1]], dat)
     data = batch.eval()
-    print data.shape
-    print data[0, :]
     data = data.astype(np.float32)
     layer1 = tf.nn.relu(tf.matmul(data, weights_1, a_is_sparse=True) + bias_1)
     layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
     output = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
-    residuals = tf.reduce_sum(tf.abs(output - data), axis = 1)
+    residuals = tf.reduce_sum(tf.abs(output - tf.cast(batch, tf.float32)), axis = 1)
     residuals = residuals.eval()
     indices = np.argsort(residuals)[::-1]
     return data[indices[0:10], :], output.eval()[indices[0:10], :], indices
@@ -244,6 +242,10 @@ def train():
     numEpochs = 1000
     numBatches = 100
     batchSize = int(round(0.001 * df_train.shape[0]))
+    print weighs_1[0, :]
+    print bias_1
+    print weights_2[0,:]
+    print bias_2
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
