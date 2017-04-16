@@ -242,10 +242,10 @@ def train():
     numEpochs = 1000
     numBatches = 100
     batchSize = int(round(0.001 * df_train.shape[0]))
-    print weighs_1[0, :]
-    print bias_1
-    print weights_2[0,:]
-    print bias_2
+    print weighs_1[0, :].eval()
+    print bias_1.eval()
+    print weights_2[0,:].eval()
+    print bias_2.eval()
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
