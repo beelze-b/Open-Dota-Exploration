@@ -45,4 +45,5 @@ rune_pickups
 
 
 Finally Got OneHotEncoding fixed. Still need to work on test function
-Had to fix number of layers. Retraining
+Had to fix number of layers. had an extra layer. Also needed to seed the matrix chosen because that might change number of features
+    if it saw different sets of categorical variables in different columns.Retraining
