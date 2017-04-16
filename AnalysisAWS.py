@@ -16,6 +16,11 @@ import itertools
 
 # In[ ]:
 
+np.random.seed(1)
+
+
+# In[ ]:
+
 import os
 import os.path
 import gc
@@ -148,7 +153,6 @@ df = hstack([df_cat_num, df_numerical])
 
 # In[ ]:
 
-np.random.seed(1)
 x = np.random.rand(df.shape[0])
 mask = np.where(x < 0.7)[0]
 mask1 = np.where(np.logical_and(x >= 0.7, x < 0.9))[0] 
@@ -216,8 +220,10 @@ ckpoint_dir = os.path.join(os.getcwd(), 'model-backups/model.ckpt')
 
 # In[ ]:
 
+flatten = lambda l: [item for sublist in l for item in sublist]
+
 def test(test_data):
-    batch = test_data[indices, :].tolil()
+    batch = test_data.tolil()
     ind = [[[i, batch.rows[i][j]] for j in range(len(batch.rows[i]))] for i in range(batch.shape[0])]
     ind = flatten(ind)
     dat = np.nan_to_num(flatten(batch.data))
@@ -227,6 +233,10 @@ def test(test_data):
     layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
     layer3 = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
     output = tf.nn.relu(tf.matmul(layer3, weights_4, a_is_sparse=True, b_is_sparse=True) + bias_4)
+    residuals = tf.reduce_sum(tf.abs(output - batch), axis = 1)
+    residuals = residuals.eval()
+    indices = np.argsort(residuals)[::-1]
+    return data[indices[0:10], :], indices
 
 
 # In[ ]:
@@ -235,7 +245,6 @@ def train():
     numEpochs = 1000
     numBatches = 100
     batchSize = int(round(0.001 * df_train.shape[0]))
-    flatten = lambda l: [item for sublist in l for item in sublist]
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
@@ -258,7 +267,11 @@ with tf.Session() as sess:
         sess.run(init)
         train()
     else:
+        print 'Doing test'
         saver.restore(sess, ckpoint_dir)
+        anomalies, indices_highest_anomaly = test(df_test)
+        numpy.savetxt("data/anomalies.csv", anomalies, delimiter=",")
+        np.savetxt('data/indices.csv', indices_highest_anomaly, delimiter = ',')
 
 
 # In[ ]:
