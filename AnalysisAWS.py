@@ -236,7 +236,7 @@ def test(test_data):
     residuals = tf.reduce_sum(tf.abs(output - batch), axis = 1)
     residuals = residuals.eval()
     indices = np.argsort(residuals)[::-1]
-    return data[indices[0:10], :], indices
+    return data[indices[0:10], :], output.eval()[indices[0:10], :], indices
 
 
 # In[ ]:
@@ -269,8 +269,9 @@ with tf.Session() as sess:
     else:
         print 'Doing test'
         saver.restore(sess, ckpoint_dir)
-        anomalies, indices_highest_anomaly = test(df_test)
-        numpy.savetxt("data/anomalies.csv", anomalies, delimiter=",")
+        anomalies, output, indices_highest_anomaly = test(df_test)
+        np.savetxt("data/anomalies.csv", anomalies, delimiter=",")
+        np.savetxt("data/output.csv", output, delimiter=",")
         np.savetxt('data/indices.csv', indices_highest_anomaly, delimiter = ',')
 
 
