@@ -230,7 +230,7 @@ def test(test_data):
     layer1 = tf.nn.relu(tf.matmul(data, weights_1, a_is_sparse=True) + bias_1)
     layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
     output = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
-    residuals = tf.reduce_sum(tf.abs(output - batch), axis = 1)
+    residuals = tf.reduce_sum(tf.abs(output - data), axis = 1)
     residuals = residuals.eval()
     indices = np.argsort(residuals)[::-1]
     return data[indices[0:10], :], output.eval()[indices[0:10], :], indices
