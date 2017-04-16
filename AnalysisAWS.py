@@ -272,10 +272,12 @@ with tf.Session() as sess:
         print weights_2[0,:].eval()
         print bias_2.eval()
         anomalies, output, indices_test = test(sess, df_test)
-        anomalies = anomalies.eval()
+        anomalies = anomalies
         output = output.eval()
         anomalies = anomalies[indices_test[0:10], :]
         output = output[indices_test[0:10], :]
+        print anomalies[0, 0:10]
+        print output[0, 0:10]
         np.savetxt("data/anomalies.csv", anomalies, delimiter=",")
         np.savetxt("data/output.csv", output, delimiter=",")
         np.savetxt('data/indices.csv', indices_highest_anomaly, delimiter = ',')
