@@ -207,8 +207,8 @@ rank = tf.rank(cost)
 momentum = 0.5
 optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(cost)
     
-variable_dict = {'weights_1': weights_1, 'weights_2': weights_2, 'weights_3': weights_3, 'weights_4': weights_4,
-                     'bias_1': bias_1, 'bias_2': bias_2, 'bias_3': bias_3, 'bias_4': bias_4}
+variable_dict = {'weights_1': weights_1, 'weights_2': weights_2, 'weights_3': weights_3,
+                     'bias_1': bias_1, 'bias_2': bias_2, 'bias_3': bias_3}
 saver = tf.train.Saver(variable_dict)
 init = tf.global_variables_initializer()
 
