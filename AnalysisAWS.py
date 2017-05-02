@@ -12,6 +12,7 @@ import tensorflow as tf
 import glob
 import datetime
 import itertools
+from time import sleep
 
 
 # In[ ]:
@@ -291,9 +292,9 @@ with tf.Session() as sess:
         np.savetxt('data/indices.csv', indices_test, delimiter = ',')
         anomalizedAnalizable = anomalies[:, 0]
         for an in anomalizedAnalizable:
-            print an
-            if canIAnalyzeThisMatch(an):
-                print an
+            sleep(1)
+            if canIAnalyzeThisMatch(int(an)):
+                print '{0:.10f}'.format(an)
 
 
 # In[ ]:
