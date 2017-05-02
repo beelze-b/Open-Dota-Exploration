@@ -225,7 +225,7 @@ def canIAnalyzeThisMatch(currentMatchID):
     host = "https://api.opendota.com/api/matches/" + str(currentMatchID)
     data = {'match_id': currentMatchID}
     data = requests.get(host, data)
-    return data.status_code == 200:
+    return data.status_code == 200
 
     
 def test(sess, test_data):
