@@ -218,7 +218,16 @@ ckpoint_dir = os.path.join(os.getcwd(), 'model-backups/model.ckpt')
 # In[ ]:
 
 flatten = lambda l: [item for sublist in l for item in sublist]
+import requests
+import json
 
+def canIAnalyzeThisMatch(currentMatchID):
+    host = "https://api.opendota.com/api/matches/" + str(currentMatchID)
+    data = {'match_id': currentMatchID}
+    data = requests.get(host, data)
+    return data.status_code == 200:
+
+    
 def test(sess, test_data):
     batch = test_data.tolil()
     ind = [[[i, batch.rows[i][j]] for j in range(len(batch.rows[i]))] for i in range(batch.shape[0])]
@@ -272,7 +281,6 @@ with tf.Session() as sess:
         print weights_2[0,:].eval()
         print bias_2.eval()
         anomalies, output, indices_test = test(sess, df_test)
-        anomalies = anomalies
         output = output.eval()
         anomalies = anomalies[indices_test[0:10], :]
         output = output[indices_test[0:10], :]
@@ -281,6 +289,10 @@ with tf.Session() as sess:
         np.savetxt("data/anomalies.csv", anomalies, delimiter=",")
         np.savetxt("data/output.csv", output, delimiter=",")
         np.savetxt('data/indices.csv', indices_test, delimiter = ',')
+        anomalizedAnalizable = anomalies[:, 0]
+        for an in anomalizedAnalizable:
+            if canIAnalyzeThisMatch(an):
+                print an
 
 
 # In[ ]:
