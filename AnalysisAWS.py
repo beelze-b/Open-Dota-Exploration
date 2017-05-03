@@ -291,10 +291,13 @@ with tf.Session() as sess:
         np.savetxt("data/output.csv", output, delimiter=",")
         np.savetxt('data/indices.csv', indices_test, delimiter = ',')
         anomalizedAnalizable = anomalies[:, 0]
+        goodMatches = []
         for an in anomalizedAnalizable:
             sleep(1)
             if canIAnalyzeThisMatch(int(an)):
                 print '{0:.10f}'.format(an)
+                goodMatches.append(int(an))
+        np.savetxt('data/goodAnomalies.csv', np.array(goodMatches), delimiter = ',')
 
 
 # In[ ]:
