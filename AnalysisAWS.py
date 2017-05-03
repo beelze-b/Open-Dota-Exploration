@@ -292,6 +292,7 @@ with tf.Session() as sess:
         np.savetxt('data/indices.csv', indices_test, delimiter = ',')
         anomalizedAnalizable = anomalies[:, 0]
         goodMatches = []
+        print len(anomalizedAnalizable)
         for an in anomalizedAnalizable:
             sleep(1)
             if canIAnalyzeThisMatch(int(an)):
