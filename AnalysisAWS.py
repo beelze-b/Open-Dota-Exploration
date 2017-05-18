@@ -277,10 +277,14 @@ with tf.Session() as sess:
     else:
         print 'Doing test'
         saver.restore(sess, ckpoint_dir)
-        print weights_1[0, :].eval()
-        print bias_1.eval()
-        print weights_2[0,:].eval()
-        print bias_2.eval()
+        np.savetxt("data/weights1.csv", weights_1.eval(), delimiter=",")
+        np.savetxt("data/bias1.csv", bias_1.eval(), delimiter=",")
+        print "BarrackColumns"
+        print barrackColumns
+        print "tower Columns"
+        print towerColumns
+        print "Hero Columns"
+        print heroColumns
         anomalies, output, indices_test, residuals = test(sess, df_test)
         output = output.eval()
         anomaliesSave = anomalies[indices_test[0:10], :]
