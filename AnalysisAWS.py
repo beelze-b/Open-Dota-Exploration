@@ -243,7 +243,7 @@ def test(sess, test_data):
     residuals = tf.reduce_sum(tf.abs(output - tf.cast(batch, tf.float32)), axis = 1)
     residuals = sess.run(residuals)
     indices = np.argsort(residuals)[::-1]
-    return data, output, indices
+    return data, output, indices, residuals
 
 
 # In[ ]:
@@ -281,7 +281,7 @@ with tf.Session() as sess:
         print bias_1.eval()
         print weights_2[0,:].eval()
         print bias_2.eval()
-        anomalies, output, indices_test = test(sess, df_test)
+        anomalies, output, indices_test, residuals = test(sess, df_test)
         output = output.eval()
         anomaliesSave = anomalies[indices_test[0:10], :]
         output = output[indices_test[0:10], :]
@@ -293,12 +293,14 @@ with tf.Session() as sess:
         anomalizedAnalizable = anomalies[:, 0]
         goodMatches = []
         print len(anomalizedAnalizable)
-        for an in anomalizedAnalizable:
+        for i in range(len(anomalizedAnalizable)):
+            an = anomalizedAnalizable[i]
+            residual = residuals[i]
             sleep(1)
             if canIAnalyzeThisMatch(int(an)):
                 print '{0:.10f}'.format(an)
-                goodMatches.append(int(an))
-        np.savetxt('data/goodAnomalies.csv', np.array(goodMatches), delimiter = ',')
+                goodMatches.append([int(an), residual])
+        np.savetxt('data/goodAnomaliesResidual.csv', np.array(goodMatches), delimiter = ',')
 
 
 # In[ ]:
