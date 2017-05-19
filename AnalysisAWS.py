@@ -149,6 +149,11 @@ df = hstack([df_numerical, df_cat_num])
 
 # In[ ]:
 
+df.shape
+
+
+# In[ ]:
+
 # df = pandas.concat([df_numerical, df_cat, df_cat_num], ignore_index=True)
 
 
@@ -202,7 +207,7 @@ layer1 = tf.nn.relu(tf.matmul(x, weights_1, a_is_sparse=True) + bias_1)
 layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
 output = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
     
-cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y-output, 2), 1))
+cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y[:, 1:y.shape[1].value]-output[:, 1:y.shape[1].value], 2), 1))
 rank = tf.rank(cost)
 
 momentum = 0.5
@@ -240,7 +245,8 @@ def test(sess, test_data):
     layer1 = tf.nn.relu(tf.matmul(data, weights_1, a_is_sparse=True) + bias_1)
     layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
     output = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
-    residuals = tf.reduce_sum(tf.abs(output - tf.cast(batch, tf.float32)), axis = 1)
+    residuals = tf.reduce_sum(tf.abs(output[:, 1:output.shape[1].value] - tf.cast(batch[:, 1:output.shape[1].value], 
+                                                                                tf.float32)), axis = 1)
     residuals = sess.run(residuals)
     indices = np.argsort(residuals)[::-1]
     return data, output, indices, residuals
@@ -311,4 +317,9 @@ with tf.Session() as sess:
 
 print 'Done'
 print datetime.datetime.now()
+
+
+# In[ ]:
+
+
 
