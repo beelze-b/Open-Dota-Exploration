@@ -58,7 +58,7 @@ for f in os.listdir("data/anomaly_data"):
         continue
     validFilePaths.append(filePath)
     
-numF = int(0.1 * len(validFilePaths))
+numF = int(0.2 * len(validFilePaths))
 print 'Using this many files {0}'.format(numF)
 validFilePaths = np.random.choice(validFilePaths, numF, replace=False)
 df_list = (pandas.read_csv(f) for f in validFilePaths)
@@ -82,7 +82,7 @@ numericalFeatures = ['match_id', 'positive_votes', 'negative_votes', 'first_bloo
                     'gpm', 'hero_heal', 'xpm', 'totalgold', 'totalxp', 'lasthits', 'denies',
                     'tower_kills', 'courier_kills', 'gold_spent', 'observer_uses', 'sentry_uses',
                     'ancient_kills', 'neutral_kills', 'camps_stacked', 'pings', 'rune_pickups']
-categoricalIntegerFeatures = ['barracks_status', 'tower_status', 'hero_id'] 
+categoricalIntegerFeatures = ['hero_id']#['barracks_status', 'tower_status', 'hero_id'] 
                               #'item0', 'item1', 'item2', 'item3', 'item4', 'item5']
 categoricalFullFeatures = ['patch']
 numFeatures = [filter(lambda x: z in x, columns) for z in numericalFeatures]
@@ -109,27 +109,32 @@ df_cat = vectorizer.fit_transform(df_cat.fillna('NA').to_dict(orient="records"))
 enc = OneHotEncoder(sparse = True)
 fitMatrix = dict.fromkeys(map(lambda x: unicode(x), categoricalIntegerFeatures))
 
-towerColumns = [filter(lambda x: z in x, columns) for z in ['tower_status']]
-towerAllCategories = list(set(reduce(lambda x, y: x+y, [df_cat_num[i].values.tolist() for i in towerColumns[0]])))
-
+#towerColumns = [filter(lambda x: z in x, columns) for z in ['tower_status']]
+#towerAllCategories = list(set(reduce(lambda x, y: x+y, [df_cat_num[i].values.tolist() for i in towerColumns[0]])))
+#print len(set(towerAllCategories))
 
 heroColumns = [filter(lambda x: z in x, columns) for z in ['hero_id']]
 heroesAllCategories = list(set(range(1, 115)                         + reduce(lambda x, y: x+y, [df_cat_num[i].values.tolist() for i in heroColumns[0]])))
-heroesAllCategories = list(itertools.chain.from_iterable(itertools.repeat(heroesAllCategories,                             1+len(towerAllCategories)/len(heroesAllCategories))))[:len(towerAllCategories)]
+print len(set(heroesAllCategories))
+#heroesAllCategories = list(itertools.chain.from_iterable(itertools.repeat(heroesAllCategories, \
+                            #1+len(towerAllCategories)/len(heroesAllCategories))))[:len(towerAllCategories)]
 
-barrackColumns = [filter(lambda x: z in x, columns) for z in ['barracks_status']]
-barrackAllCategories = list(set(reduce(lambda x, y: x+y, [df_cat_num[i].values.tolist() for i in barrackColumns[0]])))
-barrackAllCategories = list(itertools.chain.from_iterable(itertools.repeat(barrackAllCategories,                             1+len(towerAllCategories)/len(barrackAllCategories))))[:len(towerAllCategories)]
+
+#barrackColumns = [filter(lambda x: z in x, columns) for z in ['barracks_status']]
+#barrackAllCategories = list(set(reduce(lambda x, y: x+y, [df_cat_num[i].values.tolist() for i in barrackColumns[0]])))
+#print len(set(barrackAllCategories))
+#barrackAllCategories = list(itertools.chain.from_iterable(itertools.repeat(barrackAllCategories, \
+                            #1+len(towerAllCategories)/len(barrackAllCategories))))[:len(towerAllCategories)]
 
 
 
 
 for column in heroColumns[0]:
     fitMatrix[column] = heroesAllCategories
-for column in towerColumns[0]:
-    fitMatrix[column] = towerAllCategories
-for column in barrackColumns[0]:
-    fitMatrix[column] = barrackAllCategories
+#for column in towerColumns[0]:
+    #fitMatrix[column] = towerAllCategories
+#for column in barrackColumns[0]:
+    #fitMatrix[column] = barrackAllCategories
 
 fitMatrix = pandas.DataFrame.from_dict(fitMatrix)
 # order of columns matters
@@ -285,10 +290,10 @@ with tf.Session() as sess:
         saver.restore(sess, ckpoint_dir)
         np.savetxt("data/weights1.csv", weights_1.eval(), delimiter=",")
         np.savetxt("data/bias1.csv", bias_1.eval(), delimiter=",")
-        print "BarrackColumns"
-        print barrackColumns
-        print "tower Columns"
-        print towerColumns
+        #print "BarrackColumns"
+        #print barrackColumns
+        #print "tower Columns"
+        #print towerColumns
         print "Hero Columns"
         print heroColumns
         anomalies, output, indices_test, residuals = test(sess, df_test)
