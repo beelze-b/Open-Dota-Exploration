@@ -192,7 +192,6 @@ def test(sess, test_data):
 
 # In[ ]:
 
-trainFlag = False
 def train():
     numEpochs = 1000
     numBatches = 100
