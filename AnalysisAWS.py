@@ -266,7 +266,7 @@ def train():
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
-        if epochIter % 100 == 0:
+        if epochIter % 50 == 0:
             saver.save(sess, ckpoint_dir)
         for batchItr in xrange(numBatches):
             indices = np.random.choice(range(df_train.shape[0]), batchSize, replace=False)
