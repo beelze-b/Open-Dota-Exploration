@@ -97,69 +97,7 @@ catFull = list(chain(*catFull))
 
 df_numerical = df[numFeatures]
 df_numerical.loc[:, 'radiant_win'] = df_numerical.loc[:, 'radiant_win'].apply(lambda x : int(x))
-df_cat_num = df[categoricalIntegerFeatures]
-df_cat = df[catFull]
-
-#scipy sparse
-vectorizer = DictVectorizer(sparse = True)
-df_cat = vectorizer.fit_transform(df_cat.fillna('NA').to_dict(orient="records"))
-
-#scipy sparse
-# need to make sure that the categorical columns see all fields during training
-enc = OneHotEncoder(sparse = True)
-fitMatrix = dict.fromkeys(map(lambda x: unicode(x), categoricalIntegerFeatures))
-
-#towerColumns = [filter(lambda x: z in x, columns) for z in ['tower_status']]
-#towerAllCategories = list(set(reduce(lambda x, y: x+y, [df_cat_num[i].values.tolist() for i in towerColumns[0]])))
-#print len(set(towerAllCategories))
-
-heroColumns = [filter(lambda x: z in x, columns) for z in ['hero_id']]
-heroesAllCategories = list(set(range(1, 115)                         + reduce(lambda x, y: x+y, [df_cat_num[i].values.tolist() for i in heroColumns[0]])))
-print len(set(heroesAllCategories))
-#heroesAllCategories = list(itertools.chain.from_iterable(itertools.repeat(heroesAllCategories, \
-                            #1+len(towerAllCategories)/len(heroesAllCategories))))[:len(towerAllCategories)]
-
-
-#barrackColumns = [filter(lambda x: z in x, columns) for z in ['barracks_status']]
-#barrackAllCategories = list(set(reduce(lambda x, y: x+y, [df_cat_num[i].values.tolist() for i in barrackColumns[0]])))
-#print len(set(barrackAllCategories))
-#barrackAllCategories = list(itertools.chain.from_iterable(itertools.repeat(barrackAllCategories, \
-                            #1+len(towerAllCategories)/len(barrackAllCategories))))[:len(towerAllCategories)]
-
-
-
-
-for column in heroColumns[0]:
-    fitMatrix[column] = heroesAllCategories
-#for column in towerColumns[0]:
-    #fitMatrix[column] = towerAllCategories
-#for column in barrackColumns[0]:
-    #fitMatrix[column] = barrackAllCategories
-
-fitMatrix = pandas.DataFrame.from_dict(fitMatrix)
-# order of columns matters
-fitMatrix = fitMatrix[df_cat_num.columns.values.tolist()]
-enc.fit(fitMatrix)
-df_cat_num = enc.transform(df_cat_num)
-
-
-# In[ ]:
-
-from scipy.sparse import coo_matrix, hstack
-
-df_cat_num = coo_matrix(df_cat_num)
-df_cat = coo_matrix(df_cat)
-df = hstack([df_numerical, df_cat_num])
-
-
-# In[ ]:
-
-df.shape
-
-
-# In[ ]:
-
-# df = pandas.concat([df_numerical, df_cat, df_cat_num], ignore_index=True)
+df = df_numerical
 
 
 # In[ ]:
@@ -172,9 +110,12 @@ mask2 = np.where(x >= 0.9)[0]
 
 # In[ ]:
 
-df_train = df.tocsr()[mask, :]
-df_validation = df.tocsr()[mask1, :]
-df_test = df.tocsr()[mask2, :]
+df_train, df_validation, df_test = np.split(df_numerical, [int(.7*len(df_numerical)), int(.8*len(df_numerical))])
+
+
+# In[ ]:
+
+df_train
 
 
 # In[ ]:
@@ -240,17 +181,13 @@ def canIAnalyzeThisMatch(currentMatchID):
 
     
 def test(sess, test_data):
-    batch = test_data.tolil()
-    ind = [[[i, batch.rows[i][j]] for j in range(len(batch.rows[i]))] for i in range(batch.shape[0])]
-    ind = flatten(ind)
-    dat = np.nan_to_num(flatten(batch.data))
-    batch = tf.sparse_to_dense(ind, [batch.shape[0], batch.shape[1]], dat)
-    data = batch.eval()
+    batch = test_data
+    data = batch.as_matrix()
     data = data.astype(np.float32)
     layer1 = tf.nn.relu(tf.matmul(data, weights_1, a_is_sparse=True) + bias_1)
     layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
     output = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
-    residuals = tf.reduce_sum(tf.abs(output[:, 1:output.shape[1].value] - tf.cast(batch[:, 1:output.shape[1].value], 
+    residuals = tf.reduce_sum(tf.abs(output[:, 1:output.shape[1].value] - tf.cast(data[:, 1:output.shape[1].value], 
                                                                                 tf.float32)), axis = 1)
     residuals = sess.run(residuals)
     indices = np.argsort(residuals)[::-1]
@@ -259,6 +196,7 @@ def test(sess, test_data):
 
 # In[ ]:
 
+trainFlag = False
 def train():
     numEpochs = 1000
     numBatches = 100
@@ -270,12 +208,8 @@ def train():
             saver.save(sess, ckpoint_dir)
         for batchItr in xrange(numBatches):
             indices = np.random.choice(range(df_train.shape[0]), batchSize, replace=False)
-            batch = df_train[indices, :].tolil()
-            ind = [[[i, batch.rows[i][j]] for j in range(len(batch.rows[i]))] for i in range(batch.shape[0])]
-            ind = flatten(ind)
-            dat = np.nan_to_num(flatten(batch.data))
-            batch = tf.sparse_to_dense(ind, [batch.shape[0], batch.shape[1]], dat)
-            batch = batch.eval()
+            batch = df_train.sample(n=batchSize).as_matrix()
+            
             sess.run(optimizer, feed_dict = {x : batch})
 
 
@@ -290,12 +224,6 @@ with tf.Session() as sess:
         saver.restore(sess, ckpoint_dir)
         np.savetxt("data/weights1.csv", weights_1.eval(), delimiter=",")
         np.savetxt("data/bias1.csv", bias_1.eval(), delimiter=",")
-        #print "BarrackColumns"
-        #print barrackColumns
-        #print "tower Columns"
-        #print towerColumns
-        print "Hero Columns"
-        print heroColumns
         anomalies, output, indices_test, residuals = test(sess, df_test)
         output = output.eval()
         anomaliesSave = anomalies[indices_test[0:10], :]
@@ -305,7 +233,7 @@ with tf.Session() as sess:
         np.savetxt("data/anomalies.csv", anomaliesSave, delimiter=",")
         np.savetxt("data/output.csv", output, delimiter=",")
         np.savetxt('data/indices.csv', indices_test, delimiter = ',')
-        anomalizedAnalizable = anomalies[:, 0]
+        anomalizedAnalizable = list(set(anomalies[:, 0]))
         goodMatches = []
         print len(anomalizedAnalizable)
         for i in range(len(anomalizedAnalizable)):
@@ -313,7 +241,7 @@ with tf.Session() as sess:
             residual = residuals[i]
             sleep(1)
             if canIAnalyzeThisMatch(int(an)):
-                print '{0:.10f}'.format(an)
+                #print '{0:.10f}'.format(an)
                 goodMatches.append([int(an), residual])
         np.savetxt('data/goodAnomaliesResidual.csv', np.array(goodMatches), delimiter = ',')
 
