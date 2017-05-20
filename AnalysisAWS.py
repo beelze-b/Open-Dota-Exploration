@@ -58,7 +58,7 @@ for f in os.listdir("data/anomaly_data"):
         continue
     validFilePaths.append(filePath)
     
-numF = int(0.2 * len(validFilePaths))
+numF = int(0.5 * len(validFilePaths))
 print 'Using this many files {0}'.format(numF)
 validFilePaths = np.random.choice(validFilePaths, numF, replace=False)
 df_list = (pandas.read_csv(f) for f in validFilePaths)
@@ -97,7 +97,7 @@ catFull = list(chain(*catFull))
 
 df_numerical = df[numFeatures]
 df_numerical.loc[:, 'radiant_win'] = df_numerical.loc[:, 'radiant_win'].apply(lambda x : int(x))
-df = df_numerical
+df = df_numerical.fillna(0)
 
 
 # In[ ]:
@@ -110,7 +110,7 @@ mask2 = np.where(x >= 0.9)[0]
 
 # In[ ]:
 
-df_train, df_validation, df_test = np.split(df_numerical, [int(.7*len(df_numerical)), int(.8*len(df_numerical))])
+df_train, df_validation, df_test = np.split(df, [int(.7*len(df)), int(.8*len(df))])
 
 
 # In[ ]:
@@ -121,7 +121,7 @@ df_train
 # In[ ]:
 
 NumFeatures = df.shape[1]
-layer_size = [10, 10, NumFeatures]
+layer_size = [10, NumFeatures]
 learning_rate = 0.1
 
 
@@ -142,16 +142,14 @@ y = x
 #encoders
 weights_1 = tf.Variable(tf.random_normal([NumFeatures, layer_size[0]]), name='weights_1')
 bias_1 = tf.Variable(tf.random_normal([layer_size[0]]), name='bias_1')
-weights_2 = tf.Variable(tf.random_normal([layer_size[0], layer_size[1]]), name='weights_2')
-bias_2 = tf.Variable(tf.random_normal([layer_size[1]]), name='bias_2')
+
     
 #decoders
-weights_3 = tf.Variable(tf.random_normal([layer_size[1], layer_size[2]]), name='weights_3')
-bias_3 = tf.Variable(tf.random_normal([layer_size[2]]), name='bias_3')
+weights_2 = tf.Variable(tf.random_normal([layer_size[0], layer_size[1]]), name='weights_2')
+bias_2 = tf.Variable(tf.random_normal([layer_size[1]]), name='bias_2')
   
 layer1 = tf.nn.relu(tf.matmul(x, weights_1, a_is_sparse=True) + bias_1)
-layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
-output = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
+output = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
     
 cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y[:, 1:y.shape[1].value]-output[:, 1:y.shape[1].value], 2), 1))
 rank = tf.rank(cost)
@@ -159,8 +157,8 @@ rank = tf.rank(cost)
 momentum = 0.5
 optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(cost)
     
-variable_dict = {'weights_1': weights_1, 'weights_2': weights_2, 'weights_3': weights_3,
-                     'bias_1': bias_1, 'bias_2': bias_2, 'bias_3': bias_3}
+variable_dict = {'weights_1': weights_1, 'weights_2': weights_2,
+                     'bias_1': bias_1, 'bias_2': bias_2}
 saver = tf.train.Saver(variable_dict)
 init = tf.global_variables_initializer()
 
@@ -185,10 +183,8 @@ def test(sess, test_data):
     data = batch.as_matrix()
     data = data.astype(np.float32)
     layer1 = tf.nn.relu(tf.matmul(data, weights_1, a_is_sparse=True) + bias_1)
-    layer2 = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
-    output = tf.nn.relu(tf.matmul(layer2, weights_3, a_is_sparse=True, b_is_sparse=True) + bias_3)
-    residuals = tf.reduce_sum(tf.abs(output[:, 1:output.shape[1].value] - tf.cast(data[:, 1:output.shape[1].value], 
-                                                                                tf.float32)), axis = 1)
+    output = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
+    residuals = tf.reduce_sum(tf.abs(output[:,1:output.shape[1].value]- tf.cast(data[:,1:output.shape[1].value], tf.float32)), axis = 1)
     residuals = sess.run(residuals)
     indices = np.argsort(residuals)[::-1]
     return data, output, indices, residuals
@@ -202,6 +198,7 @@ def train():
     numBatches = 100
     batchSize = int(round(0.001 * df_train.shape[0]))
     for epochIter in xrange(numEpochs):
+        #print weights_1.eval()
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
         if epochIter % 50 == 0:
@@ -209,7 +206,6 @@ def train():
         for batchItr in xrange(numBatches):
             indices = np.random.choice(range(df_train.shape[0]), batchSize, replace=False)
             batch = df_train.sample(n=batchSize).as_matrix()
-            
             sess.run(optimizer, feed_dict = {x : batch})
 
 
