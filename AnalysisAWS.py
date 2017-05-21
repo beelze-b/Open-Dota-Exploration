@@ -97,7 +97,8 @@ catFull = list(chain(*catFull))
 
 df_numerical = df[numFeatures]
 df_numerical.loc[:, 'radiant_win'] = df_numerical.loc[:, 'radiant_win'].apply(lambda x : int(x))
-df = df_numerical.fillna(0)
+df_numerical = df_numerical.fillna(0)
+df = df_numerical.apply(lambda x: (x - np.mean(x)) / (np.max(x) - np.min(x)))
 
 
 # In[ ]:
@@ -195,9 +196,8 @@ def test(sess, test_data):
 def train():
     numEpochs = 1000
     numBatches = 100
-    batchSize = int(round(0.001 * df_train.shape[0]))
+    batchSize = int(round(0.01 * df_train.shape[0]))
     for epochIter in xrange(numEpochs):
-        #print weights_1.eval()
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
         if epochIter % 50 == 0:
