@@ -187,9 +187,9 @@ def test(sess, test_data):
     layer1 = tf.nn.relu(tf.matmul(data, weights_1, a_is_sparse=True) + bias_1)
     output = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
     residuals = tf.reduce_sum(tf.abs(output[:,1:output.shape[1].value]- tf.cast(data[:,1:output.shape[1].value], tf.float32)), axis = 1)
-    residuals = sess.run(residuals)
+    output_results, residuals = sess.run([output, residuals])
     indices = np.argsort(residuals)[::-1]
-    return data, output, indices, residuals
+    return data, output_results, indices, residuals
 
 
 # In[ ]:
