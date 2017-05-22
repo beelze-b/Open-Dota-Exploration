@@ -117,14 +117,9 @@ df_train, df_validation, df_test = np.split(df, [int(.7*len(df)), int(.8*len(df)
 
 # In[ ]:
 
-df_train
-
-
-# In[ ]:
-
 NumFeatures = df.shape[1]
-layer_size = [10, NumFeatures]
-learning_rate = 0.1
+layer_size = [int(NumFeatures/2.0), NumFeatures]
+learning_rate = 0.01
 
 
 # In[ ]:
@@ -150,13 +145,13 @@ bias_1 = tf.Variable(tf.random_normal([layer_size[0]]), name='bias_1')
 weights_2 = tf.Variable(tf.random_normal([layer_size[0], layer_size[1]]), name='weights_2')
 bias_2 = tf.Variable(tf.random_normal([layer_size[1]]), name='bias_2')
   
-layer1 = tf.nn.relu(tf.matmul(x, weights_1, a_is_sparse=True) + bias_1)
-output = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
+layer1 = tf.tanh(tf.matmul(x, weights_1) + bias_1)
+output = tf.matmul(layer1, weights_2) + bias_2
     
 cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y[:, 1:y.shape[1].value]-output[:, 1:y.shape[1].value], 2), 1))
 rank = tf.rank(cost)
 
-momentum = 0.5
+momentum = 0.3
 optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(cost)
     
 variable_dict = {'weights_1': weights_1, 'weights_2': weights_2,
@@ -179,14 +174,13 @@ def canIAnalyzeThisMatch(currentMatchID):
     data = requests.get(host, data)
     return data.status_code == 200
 
-    
 def test(sess, test_data):
     batch = test_data
     data = batch.as_matrix()
     data = data.astype(np.float32)
-    layer1 = tf.nn.relu(tf.matmul(data, weights_1, a_is_sparse=True) + bias_1)
-    output = tf.nn.relu(tf.matmul(layer1, weights_2, a_is_sparse=True, b_is_sparse=True) + bias_2)
-    residuals = tf.reduce_sum(tf.abs(output[:,1:output.shape[1].value]- tf.cast(data[:,1:output.shape[1].value], tf.float32)), axis = 1)
+    layer1 = tf.tanh(tf.matmul(data, weights_1) + bias_1)
+    output = tf.matmul(layer1, weights_2) + bias_2
+    residuals = tf.reduce_sum(tf.abs(output[:, 1:output.shape[1].value] - tf.cast(data[:, 1:output.shape[1].value], tf.float32)), axis = 1)
     output_results, residuals = sess.run([output, residuals])
     indices = np.argsort(residuals)[::-1]
     return data, output_results, indices, residuals
@@ -201,13 +195,11 @@ def train():
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
-        if epochIter % 50 == 0:
+        if (epochIter+1) % 50 == 0:
             saver.save(sess, ckpoint_dir)
         for batchItr in xrange(numBatches):
-            indices = np.random.choice(range(df_train.shape[0]), batchSize, replace=False)
             batch = df_train.sample(n=batchSize).as_matrix()
             sess.run(optimizer, feed_dict = {x : batch})
-
 
 with tf.Session() as sess:
     if sess.run(rank) != 0:
