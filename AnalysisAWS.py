@@ -78,10 +78,10 @@ df_catInteger_features_example = filter(lambda x: 'hero_id' in x, columns)
 from itertools import chain
 # these will require string processing on the column names to work
 numericalFeatures = ['match_id', 'positive_votes', 'negative_votes', 'first_blood_time', 'radiant_win',
-                    'duration', 'kills', 'deaths', 'assists', 'apm', 'kpm', 'kda', 'hero_dmg',
+                    'duration', 'kills', 'deaths', 'assists', 'kpm', 'kda', 'hero_dmg',
                     'gpm', 'hero_heal', 'xpm', 'totalgold', 'totalxp', 'lasthits', 'denies',
                     'tower_kills', 'courier_kills', 'gold_spent', 'observer_uses', 'sentry_uses',
-                    'ancient_kills', 'neutral_kills', 'camps_stacked', 'pings', 'rune_pickups']
+                    'ancient_kills', 'neutral_kills', 'camps_stacked', 'pings', 'rune_pickups'] #apm problem
 categoricalIntegerFeatures = ['hero_id']#['barracks_status', 'tower_status', 'hero_id'] 
                               #'item0', 'item1', 'item2', 'item3', 'item4', 'item5']
 categoricalFullFeatures = ['patch']
