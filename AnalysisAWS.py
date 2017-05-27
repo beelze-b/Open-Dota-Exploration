@@ -119,7 +119,7 @@ df_train, df_validation, df_test = np.split(df, [int(.7*len(df)), int(.8*len(df)
 
 NumFeatures = df.shape[1]
 layer_size = [int(NumFeatures/2.0), NumFeatures]
-learning_rate = 0.01
+learning_rate = 0.005
 
 
 # In[ ]:
@@ -151,7 +151,7 @@ output = tf.matmul(layer1, weights_2) + bias_2
 cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y[:, 1:y.shape[1].value]-output[:, 1:y.shape[1].value], 2), 1))
 rank = tf.rank(cost)
 
-momentum = 0.3
+momentum = 0.05
 optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(cost)
     
 variable_dict = {'weights_1': weights_1, 'weights_2': weights_2,
