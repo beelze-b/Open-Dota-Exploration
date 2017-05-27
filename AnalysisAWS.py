@@ -151,7 +151,7 @@ output = tf.matmul(layer1, weights_2) + bias_2
 cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y[:, 1:y.shape[1].value]-output[:, 1:y.shape[1].value], 2), 1))
 rank = tf.rank(cost)
 
-momentum = 0.05
+momentum = 0.0001
 optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(cost)
     
 variable_dict = {'weights_1': weights_1, 'weights_2': weights_2,
