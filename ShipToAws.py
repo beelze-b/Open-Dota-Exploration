@@ -655,7 +655,7 @@ def GoThroughABlock(initialMatchID=3215090530, blockOfMatches=100):
             if 'game_mode' not in matchJSON:
                 continue
             lobby_type = matchJSON['lobby_type']
-            game_mode = matchJSON['match_mode']
+            game_mode = matchJSON['game_mode']
             # 0 and 7 correspond to normal and ranked
             if game_mode != 1 and game_mode != 2 and game_mode != 22:
                 continue
