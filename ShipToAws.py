@@ -621,6 +621,7 @@ def extractDotaInformation(matchJSON):
                     matchInfo[factionpos+'_camps_stacked'] = PlayerExtractKey(player, 'camps_stacked')
                     matchInfo[factionpos+'_pings'] = PlayerExtractKey(player, 'pings')
                     matchInfo[factionpos+'_rune_pickups'] = PlayerExtractKey(player, 'rune_pickups')
+                    matchInfo[factionpos+'_abandons'] = PlayerExtractKey(player, 'abandons')
                     
     return matchInfo
         
@@ -634,7 +635,7 @@ from collections import defaultdict
 import pandas as pd
 
 
-def GoThroughABlock(initialMatchID=2976775347, blockOfMatches=100):
+def GoThroughABlock(initialMatchID=3215090530, blockOfMatches=100):
     mainDict = {}
     
     for currentMatchID in range(initialMatchID, initialMatchID + blockOfMatches):
@@ -672,7 +673,7 @@ def GoThroughABlock(initialMatchID=2976775347, blockOfMatches=100):
 
 match_id = 3122976970
 block = 100
-for _ in range(10000):
+for _ in range(5000):
     data = GoThroughABlock(match_id, block)
     data.to_csv("data/to_process/match{0}_block{1}.csv".format(match_id, block), index=False)
     match_id = match_id + block
