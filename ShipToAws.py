@@ -652,10 +652,15 @@ def GoThroughABlock(initialMatchID=3215090530, blockOfMatches=100):
  
             if 'lobby_type' not in matchJSON:
                 continue
-            lobby_type = matchJSON['lobby_type']
-            # 0 and 7 correspond to normal and ranked
-            if lobby_type != 0 and lobby_type != 7 and lobby_type != 1:
+            if 'game_mode' not in matchJSON:
                 continue
+            lobby_type = matchJSON['lobby_type']
+            game_mode = matchJSON['match_mode']
+            # 0 and 7 correspond to normal and ranked
+            if game_mode != 1 and game_mode != 2 and game_mode != 22:
+                continue
+            if lobby_type != 0 and lobby_type != 7:
+                contiue
  
             matchPerformance = extractDotaInformation(matchJSON)       
             for k, v in matchPerformance.items():
