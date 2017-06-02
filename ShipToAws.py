@@ -660,7 +660,7 @@ def GoThroughABlock(initialMatchID=3215090530, blockOfMatches=100):
             if game_mode != 1 and game_mode != 2 and game_mode != 22:
                 continue
             if lobby_type != 0 and lobby_type != 7:
-                contiue
+                continue
  
             matchPerformance = extractDotaInformation(matchJSON)       
             for k, v in matchPerformance.items():
