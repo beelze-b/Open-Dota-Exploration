@@ -58,7 +58,7 @@ for f in os.listdir("data/anomaly_data"):
         continue
     validFilePaths.append(filePath)
     
-numF = int(0.5 * len(validFilePaths))
+numF = int(1 * len(validFilePaths))
 print 'Using this many files {0}'.format(numF)
 validFilePaths = np.random.choice(validFilePaths, numF, replace=False)
 df_list = (pandas.read_csv(f) for f in validFilePaths)
@@ -81,7 +81,7 @@ numericalFeatures = ['match_id', 'positive_votes', 'negative_votes', 'first_bloo
                     'duration', 'kills', 'deaths', 'assists', 'kpm', 'kda', 'hero_dmg',
                     'gpm', 'hero_heal', 'xpm', 'totalgold', 'totalxp', 'lasthits', 'denies',
                     'tower_kills', 'courier_kills', 'gold_spent', 'observer_uses', 'sentry_uses',
-                    'ancient_kills', 'neutral_kills', 'camps_stacked', 'pings', 'rune_pickups'] #apm problem
+                    'ancient_kills', 'neutral_kills', 'camps_stacked', 'pings', 'rune_pickups', 'abandons'] #apm problem
 categoricalIntegerFeatures = ['hero_id']#['barracks_status', 'tower_status', 'hero_id'] 
                               #'item0', 'item1', 'item2', 'item3', 'item4', 'item5']
 categoricalFullFeatures = ['patch']
@@ -105,14 +105,13 @@ df = df_numerical
 # In[ ]:
 
 x = np.random.rand(df.shape[0])
-mask = np.where(x < 0.7)[0]
-mask1 = np.where(np.logical_and(x >= 0.7, x < 0.9))[0] 
-mask2 = np.where(x >= 0.9)[0]
+mask = np.where(x < 0.75)[0]
+mask2 = np.where(x >= 0.75)[0]
 
 
 # In[ ]:
 
-df_train, df_validation, df_test = np.split(df, [int(.7*len(df)), int(.8*len(df))])
+df_train, df_test = np.split(df, [int(.75*len(df))])
 
 
 # In[ ]:
@@ -237,9 +236,4 @@ with tf.Session() as sess:
 
 print 'Done'
 print datetime.datetime.now()
-
-
-# In[ ]:
-
-
 
