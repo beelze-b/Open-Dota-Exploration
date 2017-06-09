@@ -225,10 +225,7 @@ with tf.Session() as sess:
         for i in range(len(anomalizedAnalizable)):
             an = anomalizedAnalizable[i]
             residual = residuals[i]
-            sleep(1)
-            if canIAnalyzeThisMatch(int(an)):
-                #print '{0:.10f}'.format(an)
-                goodMatches.append([int(an), residual])
+            goodMatches.append([int(an), residual])
         np.savetxt('data/goodAnomaliesResidual.csv', np.array(goodMatches), delimiter = ',')
 
 
