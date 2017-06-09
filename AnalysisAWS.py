@@ -212,8 +212,8 @@ with tf.Session() as sess:
         np.savetxt("data/weights1.csv", weights_1.eval(), delimiter=",")
         np.savetxt("data/bias1.csv", bias_1.eval(), delimiter=",")
         anomalies, output, indices_test, residuals = test(sess, df_test)
-        anomaliesSave = anomalies[indices_test[0:10], :]
-        output = output[indices_test[0:10], :]
+        anomaliesSave = anomalies[indices_test, :]
+        output = output[indices_test, :]
         print anomalies[0, 0:10]
         print output[0, 0:10]
         np.savetxt("data/anomalies.csv", anomaliesSave, delimiter=",")
