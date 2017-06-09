@@ -80,7 +80,7 @@ from itertools import chain
 numericalFeatures = ['match_id', 'positive_votes', 'negative_votes', 'first_blood_time', 'radiant_win',
                     'duration', 'kills', 'deaths', 'assists', 'kpm', 'kda', 'hero_dmg',
                     'gpm', 'hero_heal', 'xpm', 'totalgold', 'totalxp', 'lasthits', 'denies',
-                    'tower_kills', 'courier_kills', 'gold_spent', 'observer_uses', 'sentry_uses',
+                    'tower_kills', 'courier_kills', 'observer_uses', 'sentry_uses',
                     'ancient_kills', 'camps_stacked', 'abandons'] #apm problem
 categoricalIntegerFeatures = ['hero_id']#['barracks_status', 'tower_status', 'hero_id'] 
                               #'item0', 'item1', 'item2', 'item3', 'item4', 'item5']
