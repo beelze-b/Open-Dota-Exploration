@@ -190,8 +190,8 @@ def test(sess, test_data):
 
 def train():
     numEpochs = 2000
-    numBatches = 100
-    batchSize = int(round(0.1 * df_train.shape[0]))
+    numBatches = 1000
+    batchSize = int(round(0.01 * df_train.shape[0]))
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
