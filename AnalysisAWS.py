@@ -99,6 +99,7 @@ df_numerical = df[numFeatures]
 df_numerical.loc[:, 'radiant_win'] = df_numerical.loc[:, 'radiant_win'].apply(lambda x : int(x))
 df_numerical.iloc[:, 1:len(df_numerical.columns)] = df_numerical.iloc[:, 1:len(df_numerical.columns)].apply(lambda x: (x - np.nanmean(x)) / (np.nanmax(x) - np.nanmin(x)))
 df_numerical = df_numerical.fillna(0)
+df_numerical['radiant_win'] = df_numerical['radiant_win'].apply(lambda x: 1 if x >= 0 else 0)
 df = df_numerical
 
 
@@ -146,8 +147,8 @@ harmonic_mean2 = np.sqrt(1.0 * (layer_size[1] + layer_size[0]) / (layer_size[1] 
 weights_2 = tf.Variable(tf.random_normal([layer_size[0], layer_size[1]], stddev = harmonic_mean2), name='weights_2')
 bias_2 = tf.Variable(tf.random_normal([layer_size[1]], stddev = harmonic_mean2), name='bias_2')
   
-layer1 = tf.tanh(tf.matmul(x, weights_1) + bias_1)
-output = tf.tanh(tf.matmul(layer1, weights_2) + bias_2)
+layer1 = tf.tanh(tf.matmul(x, weights_1))
+output = tf.tanh(tf.matmul(layer1, weights_2))
     
 cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y[:, 1:y.shape[1].value]-output[:, 1:y.shape[1].value], 2), 1))
 rank = tf.rank(cost)
