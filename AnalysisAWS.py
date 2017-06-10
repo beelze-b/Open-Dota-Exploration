@@ -118,7 +118,7 @@ df_train, df_test = np.split(df, [int(.75*len(df))])
 
 NumFeatures = df.shape[1]
 layer_size = [int(NumFeatures/2.0), NumFeatures]
-learning_rate = 0.005
+learning_rate = 0.01
 
 
 # In[ ]:
@@ -136,21 +136,23 @@ print df_train.shape
 x = tf.placeholder(tf.float32, [None, NumFeatures])
 y = x
 #encoders
-weights_1 = tf.Variable(tf.random_normal([NumFeatures, layer_size[0]]), name='weights_1')
-bias_1 = tf.Variable(tf.random_normal([layer_size[0]]), name='bias_1')
+harmonic_mean1 = np.sqrt(1.0 * (NumFeatures + layer_size[0]) / (NumFeatures * layer_size[0]))
+weights_1 = tf.Variable(tf.random_normal([NumFeatures, layer_size[0]], stddev=harmonic_mean1), name='weights_1')
+bias_1 = tf.Variable(tf.random_normal([layer_size[0]], stddev = harmonic_mean1), name='bias_1')
 
     
 #decoders
-weights_2 = tf.Variable(tf.random_normal([layer_size[0], layer_size[1]]), name='weights_2')
-bias_2 = tf.Variable(tf.random_normal([layer_size[1]]), name='bias_2')
+harmonic_mean2 = np.sqrt(1.0 * (layer_size[1] + layer_size[0]) / (layer_size[1] * layer_size[0]))
+weights_2 = tf.Variable(tf.random_normal([layer_size[0], layer_size[1]], stddev = harmonic_mean2), name='weights_2')
+bias_2 = tf.Variable(tf.random_normal([layer_size[1]], stddev = harmonic_mean2), name='bias_2')
   
 layer1 = tf.tanh(tf.matmul(x, weights_1) + bias_1)
-output = tf.matmul(layer1, weights_2) + bias_2
+output = tf.tanh(tf.matmul(layer1, weights_2) + bias_2)
     
 cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y[:, 1:y.shape[1].value]-output[:, 1:y.shape[1].value], 2), 1))
 rank = tf.rank(cost)
 
-momentum = learning_rate * 1.0/10
+momentum = learning_rate * 1.0/50
 optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(cost)
     
 variable_dict = {'weights_1': weights_1, 'weights_2': weights_2,
@@ -191,6 +193,7 @@ def train():
     numEpochs = 2000
     numBatches = 100
     batchSize = int(round(0.1 * df_train.shape[0]))
+    temp_out = 0
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
@@ -211,6 +214,8 @@ with tf.Session() as sess:
         saver.restore(sess, ckpoint_dir)
         np.savetxt("data/weights1.csv", weights_1.eval(), delimiter=",")
         np.savetxt("data/bias1.csv", bias_1.eval(), delimiter=",")
+        np.savetxt("data/weights2.csv", weights_2.eval(), delimiter=",")
+        np.savetxt("data/bias2.csv", bias_2.eval(), delimiter=",")
         anomalies, output, indices_test, residuals = test(sess, df_test)
         anomaliesSave = anomalies[indices_test, :]
         output = output[indices_test, :]
@@ -233,4 +238,14 @@ with tf.Session() as sess:
 
 print 'Done'
 print datetime.datetime.now()
+
+
+# In[ ]:
+
+
+
+
+# In[ ]:
+
+
 
