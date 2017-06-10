@@ -146,8 +146,8 @@ harmonic_mean2 = np.sqrt(1.0 * (layer_size[1] + layer_size[0]) / (layer_size[1] 
 weights_2 = tf.Variable(tf.random_normal([layer_size[0], layer_size[1]], stddev = harmonic_mean2), name='weights_2')
 bias_2 = tf.Variable(tf.random_normal([layer_size[1]], stddev = harmonic_mean2), name='bias_2')
   
-layer1 = tf.tanh(tf.matmul(x, weights_1) + bias_1)
-output = tf.tanh(tf.matmul(layer1, weights_2) + bias_2)
+layer1 = tf.tanh(tf.matmul(x, weights_1))
+output = tf.tanh(tf.matmul(layer1, weights_2))
     
 cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y[:, 1:y.shape[1].value]-output[:, 1:y.shape[1].value], 2), 1))
 rank = tf.rank(cost)
@@ -178,8 +178,8 @@ def test(sess, test_data):
     batch = test_data
     data = batch.as_matrix()
     data = data.astype(np.float32)
-    layer1 = tf.tanh(tf.matmul(data, weights_1) + bias_1)
-    output = tf.matmul(layer1, weights_2) + bias_2
+    layer1 = tf.tanh(tf.matmul(data, weights_1))
+    output = tf.tanh(tf.matmul(layer1, weights_2))
     residuals = tf.reduce_sum(tf.abs(output[:, 1:output.shape[1].value] - tf.cast(data[:, 1:output.shape[1].value], tf.float32)), axis = 1)
     output_results, residuals = sess.run([output, residuals])
     indices = np.argsort(residuals)[::-1]
