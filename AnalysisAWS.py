@@ -119,7 +119,6 @@ df_train, df_test = np.split(df, [int(.75*len(df))])
 
 NumFeatures = df.shape[1]
 layer_size = [int(NumFeatures/2.0), NumFeatures]
-learning_rate = 0.01
 
 
 # In[ ]:
@@ -147,14 +146,13 @@ harmonic_mean2 = np.sqrt(1.0 * (layer_size[1] + layer_size[0]) / (layer_size[1] 
 weights_2 = tf.Variable(tf.random_normal([layer_size[0], layer_size[1]], stddev = harmonic_mean2), name='weights_2')
 bias_2 = tf.Variable(tf.random_normal([layer_size[1]], stddev = harmonic_mean2), name='bias_2')
   
-layer1 = tf.tanh(tf.matmul(x, weights_1))
-output = tf.tanh(tf.matmul(layer1, weights_2))
+layer1 = tf.tanh(tf.matmul(x, weights_1) + bias_1)
+output = tf.tanh(tf.matmul(layer1, weights_2) + bias_2)
     
 cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y[:, 1:y.shape[1].value]-output[:, 1:y.shape[1].value], 2), 1))
 rank = tf.rank(cost)
 
-momentum = learning_rate * 1.0/50
-optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(cost)
+optimizer = tf.train.AdamOptimizer().minimize(cost)
     
 variable_dict = {'weights_1': weights_1, 'weights_2': weights_2,
                      'bias_1': bias_1, 'bias_2': bias_2}
