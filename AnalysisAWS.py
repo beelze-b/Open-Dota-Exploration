@@ -97,8 +97,8 @@ catFull = list(chain(*catFull))
 
 df_numerical = df[numFeatures]
 df_numerical.loc[:, 'radiant_win'] = df_numerical.loc[:, 'radiant_win'].apply(lambda x : int(x))
+df_numerical.iloc[:, 1:len(df_numerical.columns)] = df_numerical.iloc[:, 1:len(df_numerical.columns)].apply(lambda x: (x - np.nanmean(x)) / (np.nanmax(x) - np.nanmin(x)))
 df_numerical = df_numerical.fillna(0)
-df_numerical.iloc[:, 1:len(df_numerical.columns)] = df_numerical.iloc[:, 1:len(df_numerical.columns)].apply(lambda x: (x - np.mean(x)) / (np.max(x) - np.min(x)))
 df = df_numerical
 
 
@@ -237,14 +237,4 @@ with tf.Session() as sess:
 
 print 'Done'
 print datetime.datetime.now()
-
-
-# In[ ]:
-
-
-
-
-# In[ ]:
-
-
 
