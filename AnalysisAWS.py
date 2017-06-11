@@ -192,7 +192,7 @@ def test(sess, test_data):
 # In[ ]:
 
 def train():
-    numEpochs = 2000
+    numEpochs = 1000
     numBatches = 1000
     batchSize = int(round(0.01 * df_train.shape[0]))
     for epochIter in xrange(numEpochs):
