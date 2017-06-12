@@ -137,14 +137,14 @@ x = tf.placeholder(tf.float32, [None, NumFeatures])
 y = x
 #encoders
 weights_1 = tf.Variable(tf.random_normal([NumFeatures, layer_size[0]], stddev = 1.0/NumFeatures/100), name='weights_1')
-bias_1 = tf.Variable(tf.random_normal([layer_size[0]], stddev = 1.0/NumFeatures), name='bias_1')
+bias_1 = tf.Variable(tf.random_normal([layer_size[0]], stddev = 1.0/NumFeatures/100), name='bias_1')
 
 #decoders
 weights_2 = tf.Variable(tf.random_normal([layer_size[0], layer_size[1]], stddev = 1.0/NumFeatures/100), name='weights_2')
-bias_2 = tf.Variable(tf.random_normal([layer_size[1]], stddev = 1.0/NumFeatures), name='bias_2')
+bias_2 = tf.Variable(tf.random_normal([layer_size[1]], stddev = 1.0/NumFeatures/100), name='bias_2')
   
-layer1 = tf.tanh(tf.matmul(x, weights_1))
-output = tf.tanh(tf.matmul(layer1, weights_2))
+layer1 = tf.tanh(tf.matmul(x, weights_1) + bias_1)
+output = tf.tanh(tf.matmul(layer1, weights_2) + bias_2)
 
 cost = tf.reduce_mean(tf.reduce_sum(tf.pow(y-output, 2), 1))
 rank = tf.rank(cost)
@@ -181,8 +181,8 @@ def test(sess, test_data):
     batch = test_data
     data = batch.as_matrix()
     data = data.astype(np.float32)
-    layer1 = tf.tanh(tf.matmul(data, weights_1))
-    output = tf.tanh(tf.matmul(layer1, weights_2))
+    layer1 = tf.tanh(tf.matmul(data, weights_1) + bias_1)
+    output = tf.tanh(tf.matmul(layer1, weights_2) + bias_2)
     residuals = tf.reduce_sum(tf.abs(output - tf.cast(data, tf.float32)), axis = 1)
     output_results, residuals = sess.run([output, residuals])
     indices = np.argsort(residuals)[::-1]
@@ -198,6 +198,9 @@ def train():
     for epochIter in xrange(numEpochs):
         print 'Epoch: {0}'.format(epochIter)
         gc.collect()
+        batch = df_train.sample(n=batchSize).as_matrix()
+        temp_out = sess.run(cost, feed_dict = {x: batch})
+        print temp_out
         if (epochIter+1) % 50 == 0:
             saver.save(sess, ckpoint_dir)
         for batchItr in xrange(numBatches):
